@@ -1,4 +1,4 @@
-myscripts (0.4.1-2.1) UNRELEASED; urgency=low
+myscripts (0.4.2-1) UNRELEASED; urgency=low
 
   * Update my-photo-sign script to add border to image,
   * Update go-chroot to mount /dev/pts with bind options.
