@@ -1,0 +1,11 @@
+These shell scripts have been written by Laurent 
+Guignard<lguignard.debian@gmail.com>.
+They have been written to suite my needs. You can rewrite or modify them 
+with the GPL version 2 licence restrictions.
+
+You will find in this package Bash, Sh and Perl scripts. May be these 
+ones are provided as they are and author(s) can't be responsible of any 
+problem when using. The main advice is to backup your data before testing 
+theses scripts.
+
+

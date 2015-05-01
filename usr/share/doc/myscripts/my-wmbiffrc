@@ -1,0 +1,6 @@
+interval=10
+
+label.0=metro-gi
+path.0=mbox:/var/mail/metro-gi
+
+

@@ -1,0 +1,216 @@
+#!/usr/bin/perl
+#
+#    <Script to build a mutt addressbook from LDAP directory>
+#		 Version : 0.0.2 - 2009.03.23 - Laurent Guignard
+#		 Version : 0.0.3 - 2009.03.25 - Laurent Guignard
+#
+#    Copyright (C) 2009  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+#		 Authors :
+#			- Laurent Guignard<lguignard.debian@gmail.com>
+#	
+#		 Todo :
+#			- Create documentation according to POD recomandations
+#			- 
+
+use Net::LDAP;
+use Net::LDAP::Entry;
+
+$ldap_server="localhost";
+$rootdn="cn=admin,dc=home,dc=famille-guignard,dc=org";
+$rootpwd="password";
+%assoc;
+%assoc_sort;
+%display_name;
+
+#
+# \fn get_contact [param]
+# \param $param Optional parameter to print (or not) results
+# \brief Get lists of all contacts in a LDAP directory
+#		If param is not provide, this function will print the results as
+#   a mutt contact file
+sub get_contact {
+	$filter="(objectClass=inetOrgPerson)";
+	$dn_base='ou=contacts,dc=home,dc=famille-guignard,dc=org';
+
+	$ldap=Net::LDAP->new("$ldap_server") or die "$@";
+	$mesg=$ldap->bind($rootdn, password=>$rootpwd);
+	$mesg=$ldap->search(base=>"$dn_base", filter=>"$filter");
+	$mesg->code && die $mesg->error;
+
+	foreach $entry ($mesg->entries) { 
+		my $mail=$entry->get_value("mail");
+		my $cn=$entry->get_value("cn");
+		my $dn=$entry->dn();
+		my $alias_name=$cn;
+		$alias_name=~ s/ /_/g;
+		$assoc{$dn}=$alias_name;
+		$display_name{$dn}=$cn;
+		unless($_[0]) {
+			print "alias $alias_name $cn <$mail>\n";
+		}
+	#	$entry->dump; 
+	}
+	$mesg=$ldap->unbind;
+}
+
+
+#
+# \fn get_groupofcontact
+# \brief Build groups of contacts for MUTT
+sub get_groupofcontact {
+	get_contact 1;
+	$filter="(objectClass=groupOfNames)";
+	$dn_base='ou=mailing,dc=home,dc=famille-guignard,dc=org';
+	$ldap=Net::LDAP->new("$ldap_server") or die "$@";
+	$mesg=$ldap->bind($rootdn, password=>$rootpwd);
+	$mesg=$ldap->search(base=>"$dn_base", filter=>"$filter");
+	$mesg->code && die $mesg->error;
+
+	foreach $entry ($mesg->entries) { 
+		my $cn=$entry->get_value("cn");
+		my $group="alias $cn ";
+		my $i=0;
+
+		foreach my $attr ($entry->attributes) {
+			if($attr eq "member") {
+				foreach my $value ($entry->get_value($attr)) {
+					if($i==0) {
+						$group="$group".$assoc{$value};
+					}
+					else {
+						$group="$group, ".$assoc{$value};
+					}
+					$i++;
+				}
+			}
+		}
+		print "$group\n";
+	}
+	$mesg=$ldap->unbind;
+}
+
+
+#
+# \fn MemberOfGroup ouput
+# \param $output Type of output.
+#		- html : Output is in HTML format
+#		- text : Output is in text format
+# \brief Build a list of groups' members
+sub MemberOfGroup {
+	my $output;
+
+	unless($_[0]) {
+		$output="html";
+	}
+	else {
+		$output=$_[0];
+	}
+
+	get_contact 1;
+	$filter="(objectClass=groupOfNames)";
+	$dn_base='ou=groups,dc=home,dc=famille-guignard,dc=org';
+	$ldap=Net::LDAP->new("$ldap_server") or die "$@";
+	$mesg=$ldap->bind($rootdn, password=>$rootpwd);
+	$mesg=$ldap->search(base=>"$dn_base", filter=>"$filter");
+	$mesg->code && die $mesg->error;
+	my $list;
+	my $div;
+
+	# HTML output formating
+	if($output eq "html") {
+		$list="<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\n";
+		$list=$list."\"http://www.w3.org/TR/xhtml11/DTD/xhtml1-strict.dtd\">";
+		$list=$list."<html>\n<head>\n\t<title>Listes des membres des groupes</title>\n";
+		$list=$list."\t<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n";
+		$list=$list."<style type=\"text/css\">\n";
+		$list=$list."\@import url(styles/display.css);\n";
+		$list=$list."</style>\n";
+		$list=$list."<script type=\"text/javascript\" src=\"display.js\">\"\n";
+		$list=$list."</script>\n";
+		$list=$list."</head>\n<body onload=\"javascript:hide_show(document.getElementById('cn'));\">\n";
+		$list=$list."<div class=\"data\">\n";
+		$list=$list."<select id=\"cn\" onchange=\"javascript:hide_show(document.getElementById('cn'));\">\n";
+		foreach $entry ($mesg->entries) {
+			my $cn=$entry->get_value("cn");
+			$list=$list."<option>$cn</option>\n";
+			$div=$div."<div id=\"$cn\">\n<ul>\n";
+			foreach my $attr ($entry->attributes) {
+				if($attr eq "member") {
+					foreach my $value (sort $entry->get_value($attr)) {
+						$div=$div."<li>".$display_name{$value}."</li>\n";
+					}
+				}
+			}
+			$div=$div."</ul>\n</div>\n";
+		}
+		$list=$list."</select>\n".$div."</div>\n";
+		$list=$list."</body>\n</html>";
+	}
+	
+	# TEXT output formating
+	elsif($output eq "text") {
+		foreach $entry ($mesg->entries) {
+			my $cn=$entry->get_value("cn");
+			$list="$cn : \n";
+			foreach my $attr ($entry->attributes) {
+				if($attr eq "member") {
+					foreach my $value ($entry->get_value($attr)) {
+						$list="$list\t- ".$display_name{$value}."\n";
+					}
+				}
+			}
+		}
+	}
+
+	print "$list\n";
+	$mesg=$ldap->unbind;
+}
+
+
+if(! @ARGV) {	
+# No command line arguments, all aliases (contacts & groups) in the same file
+	get_contact;
+}
+else { # Here parsing of arguments
+	foreach my $arg (@ARGV) {
+		if(($arg eq "contacts")or($arg eq "c")) {
+			get_contact;
+		}
+		elsif(($arg eq "groups")or($arg eq "g")) {
+			get_groupofcontact;
+		}
+		elsif(($arg eq "list")or($arg eq "l")) {
+			MemberOfGroup text;
+		}
+		elsif(($arg eq "html")or($arg eq "h")) {
+			MemberOfGroup html;
+		}
+		else {
+			$error_msg="USAGE : $0 [OPTION].\n". 
+			"Options could be : \n".
+			"'contacts' as 'c' :\tbuild addressbook for MUTT mail user agent\n".
+			"'groups' as 'g' :\tbuild groups for MUTT mail user agent\n".
+			"'list' as 'l' :\t\tbuild a members' list for each groups of the LDAP directory\n".
+			"'html' as 'h' :\t\tbuild and HTML members's list for each groups of the LDAP directory.\n".
+			"IMPORTANT : do not forget to install /usr/share/myscripts/display.js file in the ".
+			"directory which will contains the HTML destination file !\n";
+			die $error_msg;
+		}
+	}
+}
+

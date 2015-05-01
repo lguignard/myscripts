@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+#    <Script to get package list in order to restore a station>
+#    Copyright (C) 2009  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+
+
+DPKG_BIN=`which dpkg`
+SCRIPT_NAME="$0"
+II_PKG_LIST=""
+
+#
+# Display the commande usage
+usage() {
+	echo "$SCRIPT_NAME usage :"
+	echo -e "\t$SCRIPT_NAME [file]"
+	echo -e "\tfile : file name to store configuration"
+}
+
+#
+# Get the entire package list
+get_pkg_list() {
+	II_PKG_LIST=`$DPKG_BIN -l | grep ^ii | awk '{ print $2 }' | grep -v ^lib`
+}
+
+#
+# Main
+if test "$1"="--help"; then
+	usage
+fi
+get_pkg_list
+
+
+echo $II_PKG_LIST | less
+
+

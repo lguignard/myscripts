@@ -1,0 +1,7 @@
+HOST='localhost'
+BASEDN='dc=home,dc=famille-guignard,dc=org'
+ROOTDN="cn=admin,dc=home,dc=famille-guignard,dc=org"
+ROOTPW="password"
+DEST="$HOME/tmp/ldapsave.ldif"
+
+

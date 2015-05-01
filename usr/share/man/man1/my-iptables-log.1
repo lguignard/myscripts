@@ -1,0 +1,28 @@
+.TH my-iptables-log 1 
+.SH NAME
+my-iptables-log \- netfilter log report mailer
+.SH SYNOPSIS
+.B my-iptables-log
+.SH DESCRIPTION
+This script is used to mail a report about netfilter logs to a 
+specified e-mail.
+.PP
+This script requires root privileges to be modified. The script has 
+to launched by a user with has access to log file, generally root user.
+.PP
+These modifications are of two sorts :
+.RS
+.B MAIL 
+variable is set to receiver address
+.P
+.B MAIFROM 
+variable is set to sender address
+.RE
+.SH SEE ALSO
+.BR iptables (1),
+.BR fwlogwatch (1)
+.SH AUTHOR
+my-iptables-logs was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

@@ -1,0 +1,21 @@
+.TH my-rfc-sync 1 
+.SH NAME
+my-rfc-sync \- synchronize RFCs on local host
+.SH SYNOPSIS
+.B my-rfc-sync
+.br
+.SH DESCRIPTION
+This script is used to get a local copy of RFCs. It's update the local 
+copy of all RFCs from a source (ftp.rfc-editor.org).
+.PP
+The local repository of RFCs ( $HOME/doc/rfcs ) needs to exist. You have to
+create the doc/rfcs directory under your home directory.
+To do you can run the command :
+.BR mkdir -p $HOME/doc/rfcs
+.SH SEE ALSO
+.BR rsync (1)
+.SH AUTHOR
+my-rfc-sync was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

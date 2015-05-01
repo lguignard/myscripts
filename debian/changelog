@@ -1,0 +1,164 @@
+myscripts (0.4.1-2) UNRELEASED; urgency=low
+
+  * Update my-photo-sign script to add border to image
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Sun, 09 Nov 2014 09:24:04 +0100
+
+myscripts (0.4.1-1) unstable; urgency=low
+
+  * Add my-photo-sign script
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Fri, 08 Aug 2014 17:16:17 +0100
+
+myscripts (0.3.1-1) unstable; urgency=low
+
+  * Switch to dpkg-source 3.0 (quilt) format,
+  * Add my-fit2gpx and my-garminmapdownload scripts,
+  * Add missing manpages,
+  * Add my-photo-sign script
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Fri, 17 May 2013 19:16:14 +0200
+
+myscripts (0.2.2-13) unstable; urgency=low
+
+  * Update my-cyclo-epreuves script to solve HTML special character problems,
+  * Update my-garmin script to solve usage message problem,
+  * Add my-garmin manpage,
+  * Add my-spamupdate script with associated man page.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Sat, 28 Apr 2012 16:00:10 +0200
+
+myscripts (0.2.2-12) unstable; urgency=low
+
+  * Add my-garmin script. It can't download and/or install library to handle 
+    Garmin GPS from your web browser.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Sun, 18 Mar 2012 15:46:08 +0100
+
+myscripts (0.2.2-11) unstable; urgency=low
+
+  * Update the dpkg-buildpackage of my-build script (add -sa option),
+  * Add my-md5 script to crypt a word stroke on keyboard into its MD5 sum,
+  * Update firewall script in reason of previous display problems.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Fri, 01 Apr 2011 15:38:50 +0200
+
+myscripts (0.2.2-10) unstable; urgency=low
+
+  * Update my-addressbook to fit LDAP updates (ou=mailing instead of ou=groups).
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Thu, 25 Feb 2010 16:00:19 +0100
+
+myscripts (0.2.2-9) unstable; urgency=low
+
+  * Add the my-cyclo-epreuve script.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Sat, 13 Feb 2010 20:37:49 +0100
+
+myscripts (0.2.2-8) unstable; urgency=low
+
+  * Change the my-debref script to fix a bug during repository creation.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Tue, 03 Nov 2009 21:52:12 +0100
+
+myscripts (0.2.2-7) unstable; urgency=low
+
+  * Change shell in all scripts to /bin/sh because Dash Debian change,
+  * Change go-chroot to add /tmp mapping between chroot and host,
+  * Add usr/share/myscript/ldap_query.vbs file which contains LDAP query
+    with VBS.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Mon, 02 Nov 2009 21:16:27 +0100
+
+myscripts (0.2.2-6) unstable; urgency=low
+
+  * Increase the standard version number to 3.8.2.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Thu, 23 Jul 2009 15:58:55 +0200
+
+myscripts (0.2.2-5) unstable; urgency=low
+
+  * Update my-bridge script to handle firewall settings.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Thu, 18 Jun 2009 10:09:16 +0200
+
+myscripts (0.2.2-4) unstable; urgency=low
+
+  * my-bridge script
+    - Add configuration file,
+    - routing information update.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Tue, 16 Jun 2009 14:52:12 +0200
+
+myscripts (0.2.2-3) unstable; urgency=low
+
+  * New version of my-addressbook (better difference between HTML and text),
+  * Add style (usr/share/myscripts/styles/display.css) to my-addressbook result,
+  * Fix my-debref bug for FTP upload command (need to be tested),
+  * Fix bug in /usr/bin/go-chroot script in mount/umount procedure.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Tue, 14 Apr 2009 15:06:51 +0200
+
+myscripts (0.2.2-2) unstable; urgency=low
+
+  * New version of my-addressbook script,
+  * New version of my-debref script :
+    - pure Bourne shell script (no bashisms)
+    - Fix several shell bugs in test procedures,
+  * New version of go-chroot
+    - $CHROOT/dev/pts mount options change,
+  * New version of my-build.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Tue, 07 Apr 2009 15:28:40 +0200
+
+myscripts (0.2.2-1) unstable; urgency=low
+
+  * New upstream version.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Mon, 23 Mar 2009 11:00:51 +0100
+
+myscripts (0.2-6) unstable; urgency=low
+
+  * Add script my-debbug and associated man page,
+  * Add script my-ip and associated man page,
+  * Update of my-debref script,
+  * Add script my-savesvn and associated man page,
+  * Add my-clear-iptables script with associated man page,
+  * Add my-savehome script with associated man page,
+  * Update the go-chroot man page.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Thu, 05 Feb 2009 15:45:56 +0100
+
+myscripts (0.2-5) unstable; urgency=low
+
+  * Add my-saveldap script and associated manpage,
+  * Update the my-debref script to build a local repository.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Thu, 11 Dec 2008 10:16:39 +0100
+
+myscripts (0.2-4) unstable; urgency=low
+
+  * Add the usr/bin/my-hib script and its associated manapage.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Thu, 30 Oct 2008 08:37:36 +0100
+
+myscripts (0.2-3) unstable; urgency=low
+
+  * Add the usr/bin/go-chroot file and its associated manpage,
+  * Add the usr/bin/my-build script and its associated manpage.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Wed, 29 Oct 2008 15:19:11 +0100
+
+myscripts (0.2-2) unstable; urgency=low
+
+  * my-kvm script add. This script has to run a Kernel Virtual Machine 
+    from the disk_image argument provided on the command line.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Mon, 13 Oct 2008 15:17:30 +0200
+
+myscripts (0.2-1) unstable; urgency=low 
+
+  * Initial release.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Wed, 27 Aug 2008 09:50:33 +0200
+

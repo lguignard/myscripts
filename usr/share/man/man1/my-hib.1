@@ -1,0 +1,30 @@
+.TH my-hib 1 
+.SH NAME
+my-hib \- script to shutdown automatically my desktop and hibernate my laptop
+.SH SYNOPSIS
+.B my-hib
+[username]
+.SH DESCRIPTION
+This script is used to shutdown my server and hibernate my laptop.
+.PP
+.B username
+This is the username with system shutdown right on the remote host.
+.PP
+.B The remote host has to run SSH server (sshd).
+.PP
+.B RUSERNAME
+This is a dedicated environment variable used by this shell script. If set,
+this variable has to contain the remote user name (login) on the remote
+host to shutdown.
+.PP
+.B RHOST
+This is a dedicated environment variable used by this shell script. If set,
+this variable has to contain the remote host name to shutdown.
+.SH SEE ALSO
+.BR ssh (1),
+.BR hibernate (1)
+.SH AUTHOR
+my-hib was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

@@ -1,0 +1,84 @@
+#!/bin/sh
+#
+#   <Script to build a Debian package from sources>
+#   Copyright (C) 2008  Laurent Guignard
+#		
+#		Version 0.0.1 - March 2009, 29th - Laurent Guignard
+#		Version 0.0.2 - March 2009, 30th - Laurent Guignard
+#		Version 0.0.3 - March 2009, 31st - Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; version 2 of the License
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+#
+#		Authors
+#			- Laurent Guignard<lguignard.debian@gmail.com>
+#
+#		ChangeLog
+#			- March 2009, 31st - Laurent Guignard<lguignard.debian@gmail.com>
+#				- Add the dpkg-buildpackage options handling via .my-build configuration file
+#
+#			- March 2009, 30th - Laurent Guignard<lguignard.debian@gmail.com>
+#				- Add the possibility to configure script with .my-build file in home 
+#					directory. Add variable :
+#					FASTER : true/false 
+#									(true : one dpkg-buildpackage, false : two dpkg-buildpackage)
+#			
+#			- August 2009, 4th - Laurent Guignard<lguignard.debian@gmail.com> 
+#				- Change shell executed by default from Bash to sh to suite Debian 
+#					politic about shell change to Dash
+
+
+if test -f $HOME/.my-build; then
+	. $HOME/.my-build
+else
+	FASTER="false"
+fi
+
+BASE="$HOME/buildpkg"
+PWD=`pwd`
+if [ -n "$1" ]  ; then
+	PKGNAME="$1"
+	PKGFILE=`echo $PKGNAME | sed s/-/_/g`
+	UPSTREAM_PKGNAME=`echo $PKGNAME | sed 's/-\([0-9]\.\)/_\1/g'`
+else
+	PKGNAME=`basename $PWD`
+	PKGFILE=`echo $PKGNAME | sed s/-/_/g`
+	UPSTREAM_PKGNAME="$PKGNAME"
+fi
+DESTPKG="$BASE/$PKGNAME/$PKGNAME"
+
+if [ ! -d "$DESTPKG" ]; then
+	mkdir -p "$DESTPKG"
+fi
+
+rsync -rlAogt --exclude=.svn --delete . "$DESTPKG"
+
+if [ ! -f "$BASE/$PKGNAME/$UPSTREAM_PKGNAME.orig.tar.gz" ]; then
+	mv "$DESTPKG/debian" "$BASE/$PKGNAME"
+	cd "$BASE/$PKGNAME"
+	tar zcf "$UPSTREAM_PKGNAME.orig.tar.gz" "$PKGNAME"
+	mv "$BASE/$PKGNAME/debian" "$DESTPKG"
+fi
+
+cd "$DESTPKG"
+
+DPKG_BLDPKG_OPTS="-tc $MORE_DPKG_OPT"
+dpkg-buildpackage -rfakeroot $DPKG_BLDPKG_OPTS
+if [ "$FASTER" = "false" ]; then
+	dpkg-buildpackage -rfakeroot -sa $DPKG_BLDPKG_OPTS
+fi
+
+changefile=`ls $BASE/$PKGNAME/*.changes`
+echo "$changefile"
+
+lintian -Ii "$changefile" 

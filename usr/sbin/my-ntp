@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+#    <Script to synchronize with a list of NTP Servers>
+#    Copyright (C) 2007  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+MAIL_USER='root'
+
+NTPDATE_BIN=`which ntpdate`
+MAIL_BIN=`which mail`
+
+RETURN=false
+
+if [ ! $NTPDATE_BIN ]; then
+	MSG="Error, no ntpdate command found on yous system. Please install the needed package or compile froms scratch !"
+	echo $MSG | $MAIL_BIN -s "NTP problem : ntpdate binary not found" $MAIL_USER -
+	exit -1
+else
+	for server in $@; do
+		$NTPDATE_BIN "$server" 2>&1 1>&/dev/null
+		if [ $? -ne 1 ]; then
+			RETURN=true
+			break;
+		fi
+	done
+fi
+
+if [ $RETURN = false ]; then
+	echo "Error no time server could be reached." | $MAIL_BIN -s "NTP problem" $MAIL_USER -
+fi

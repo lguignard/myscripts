@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+#    <Script to clear all iptables rules and set default to ACCPET>
+#    Copyright (C) 2009  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+#   - August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                                  
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+#
+# TODO
+# 	- check for the POSTROUTING and PREROUTING rules if it needed or not
+
+
+/sbin/iptables -F
+/sbin/iptables -P INPUT ACCEPT
+/sbin/iptables -P OUTPUT ACCEPT
+/sbin/iptables -P FORWARD ACCEPT
+#/sbin/iptables -P PREROUTING ACCEPT
+#/sbin/iptables -P POSTROUTING ACCEPT
+
+/sbin/iptables-save | while true
+do
+	read line
+#for line in `/sbin/iptables-save`; do
+	rule=`echo "$line" | grep -v "^-A" | grep -v ":OUTPUT" | grep -v "^:INPUT" | \
+		grep -v "^:FORWARD" | grep -v "^:PREROUTING" | grep -v "^:POSTROUTING"  \
+		| grep -v "^*" | grep -v "^COMMIT" | grep -v "^#" \
+		|awk -F' ' '{ print $1 }'`
+
+	if [ "$rule" != "" ]; then
+		rule=`echo "${rule:1}"`
+		/sbin/iptables -F $rule
+		/sbin/iptables -X $rule
+	fi
+
+	if [ "$line" = "" ]; then break; fi
+done
+

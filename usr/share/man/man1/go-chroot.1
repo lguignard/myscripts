@@ -1,0 +1,31 @@
+.TH go-chroot 1
+.SH NAME
+go-chroot \- Open the chroot environment
+.SH SYNOPSIS
+.B go-chroot
+.I [chroot_directory]
+.SH DESCRIPTION
+This script will execute a jailed shell in within a dedicated directory 
+(usually set in user home directory).
+.BR
+.B chroot_directory 
+this parameter is optional. If it exists, it has to be the complete path 
+where the chroot environment is installed.
+.P
+You need mount command access (via sudo) to run this script. This is due
+to the fact that you could not have a host on which the chroot is officially 
+declared and/or the system administrator set /dev, /sys and /proc directories 
+of the chroot.
+.P
+It is easy to modify this parameter by copying the go-chroot script in user
+home directory and comment this "sudo lines".
+.P
+Once script is launched, a jailed shell is running as root user. Futur actions
+depend on what is installed in chroot environment.
+.SH SEE ALSO
+.BR chroot (1)
+.SH AUTHOR
+go-chroot was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

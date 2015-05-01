@@ -1,0 +1,215 @@
+#EXTM3U
+#EXTINF:0,0. Mosaique 1 Bouquet TV
+udp://@232.0.1.29:8208
+#EXTINF:0,0. Mosaique 2 Bouquet TV
+udp://@232.0.1.30:8208
+#EXTINF:0,0. Mosaique 3 Bouquet TV
+udp://@232.0.1.50:8208
+#EXTINF:0,00. Mosaique 1 CanalSat
+udp://@239.192.2.42:8208
+#EXTINF:0,00. Mosaique 2 CanalSat
+udp://@239.192.2.43:8208
+#EXTINF:0,00. Mosaique 3 CanalSat
+udp://@239.192.2.44:8208
+#EXTINF:0,00. Mosaique 1 TPS sonorise
+udp://@239.192.0.140:8208
+#EXTINF:0,00. Mosaique 2 TPS sonorise
+udp://@239.192.0.190:8208
+#EXTINF:0,1. TF1
+udp://@232.0.1.17:8208
+#EXTINF:0,2. France 2
+udp://@232.0.1.1:8208
+#EXTINF:0,2. France 2 (sur canal evenement)
+udp://@232.0.2.1:8208
+#EXTINF:0,3. France 3 National
+udp://@232.0.1.2:8208
+#EXTINF:0,4. Canal+ (en clair)
+udp://@239.192.2.61:8208
+#EXTINF:0,5. France 5
+udp://@232.0.1.4:8208
+#EXTINF:0,6. M6
+udp://@232.0.1.10:8208
+#EXTINF:0,7. Arte
+udp://@232.0.1.5:8208
+#EXTINF:0,7. Arte (en allemand par CanalSat)
+udp://@239.192.2.93:8208
+#EXTINF:0,8. Direct 8
+udp://@232.0.1.19:8208
+#EXTINF:0,9. W9
+udp://@232.0.1.43:8208
+#EXTINF:0,10. TMC
+udp://@232.0.1.7:8208
+#EXTINF:0,11. NT 1
+udp://@232.0.1.20:8208
+#EXTINF:0,12. NRJ 12
+udp://@232.0.1.8:8208
+#EXTINF:0,13. LCP/PS
+udp://@232.0.1.21:8208
+#EXTINF:0,13. LCP/PS (par CanalSat)
+udp://@239.192.2.122:8208
+#EXTINF:0,14. France 4
+udp://@232.0.1.9:8208
+#EXTINF:0,15. BFM TV
+udp://@232.0.1.22:8208
+#EXTINF:0,16. i>Tele
+udp://@239.192.2.7:8208
+#EXTINF:0,17. Europe 2 TV
+udp://@232.0.1.11:8208
+#EXTINF:0,18. Gulli
+udp://@232.0.1.12:8208
+#EXTINF:0,24. 24/24 A La Carte
+udp://@232.0.1.23:8208
+#EXTINF:0,25. 24/24 Abonnement
+udp://@232.0.1.18:8208
+#EXTINF:0,31. TV 5 Monde
+udp://@232.0.1.13:8208
+#EXTINF:0,31. TV 5 Monde (par CanalSat)
+udp://@239.192.2.127:8208
+#EXTINF:0,32. France O
+udp://@232.0.1.24:8208
+#EXTINF:0,32. France O (par CanalSat)
+udp://@239.192.2.191:8208
+#EXTINF:0,60. AB Moteurs
+udp://@232.0.1.44:8208
+#EXTINF:0,70. Euronews
+udp://@232.0.1.25:8208
+#EXTINF:0,71. BBC World
+udp://@232.0.1.33:8208
+#EXTINF:0,72. Deutsche Welle
+udp://@232.0.1.34:8208
+#EXTINF:0,73. CNN
+udp://@232.0.1.3:8208
+#EXTINF:0,73. CNN (par CanalSat)
+udp://@239.192.2.129:8208
+#EXTINF:0,74. Al Jazeera
+udp://@232.0.1.51:8208
+#EXTINF:0,74. Al Jazeera (par CanalSat)
+udp://@239.192.2.237:8208
+#EXTINF:0,75. Medi 1 Sat
+udp://@232.0.1.52:8208
+#EXTINF:0,80. Trace TV
+udp://@232.0.1.26:8208
+#EXTINF:0,101. Luxe TV
+udp://@232.0.1.37:8208
+#EXTINF:0,102. Fashion TV
+udp://@232.0.1.32:8208
+#EXTINF:0,150. Demain
+udp://@232.0.1.31:8208
+#EXTINF:0,151. KTO
+udp://@232.0.1.47:8208
+#EXTINF:0,151. KTO (par CanalSat)
+udp://@239.192.2.218:8208
+#EXTINF:0,160. Jet
+udp://@232.0.1.42:8208
+#EXTINF:0,161. Astrocenter
+udp://@232.0.1.53:8208
+#EXTINF:0,165. Liberty TV
+udp://@232.0.1.35:8208
+#EXTINF:0,166. M6 Boutique
+udp://@232.0.1.48:8208
+#EXTINF:0,167. Best of Shopping
+udp://@232.0.1.49:8208
+#EXTINF:0,175. TV8 Mont Blanc
+udp://@232.0.1.46:8208
+#EXTINF:0,176. Telif
+udp://@232.0.1.54:8208
+#EXTINF:0,190. RTP Internacional
+udp://@232.0.1.36:8208
+#EXTINF:0,190. RTP Internacional (par CanalSat)
+udp://@239.192.2.236:8208
+#EXTINF:0,191. TVE Internacional
+udp://@232.0.1.6:8208
+#EXTINF:0,192. TVP Polonia
+udp://@232.0.1.45:8208
+#EXTINF:0,193. 2M Maroc
+udp://@232.0.1.38:8208
+#EXTINF:0,193. 2M Maroc (par CanalSat)
+udp://@239.192.2.234:8208
+#EXTINF:0,194. Canal Algerie
+udp://@232.0.1.39:8208
+#EXTINF:0,194. Canal Algerie (par CanalSat)
+udp://@239.192.2.235:8208
+#EXTINF:0,195. TV7 Tunisia
+udp://@232.0.1.40:8208
+#EXTINF:0,195. TV7 Tunisia (par CanalSat)
+udp://@239.192.2.238:8208
+#EXTINF:0,196. CCTV 9
+udp://@232.0.1.41:8208
+#EXTINF:0,197. Channel One Russia (ORTi)
+udp://@232.0.1.55:8208
+#EXTINF:0,00. Zik'
+udp://@239.192.2.153:8208
+#EXTINF:0,00. CNBC Europe
+udp://@239.192.2.212:8208
+#EXTINF:0,00. Canal+ Decale (en clair)
+udp://@239.192.2.64:8208
+#EXTINF:0,00. Canal+ Sport (en clair)
+udp://@239.192.2.65:8208
+#EXTINF:0,00. Foot+ (en clair)
+udp://@239.192.2.35:8208
+#EXTINF:0,00. Foot+ (en clair)
+udp://@239.192.2.36:8208
+#EXTINF:0,00. Foot+ (en clair)
+udp://@239.192.2.37:8208
+#EXTINF:0,00. Foot+ (en clair)
+udp://@239.192.2.38:8208
+#EXTINF:0,00. Foot+ (en clair)
+udp://@239.192.2.39:8208
+#EXTINF:0,00. Foot+ (en clair)
+udp://@239.192.2.40:8208
+#EXTINF:0,00. Foot+ (en clair)
+udp://@239.192.2.41:8208
+#EXTINF:0,00. Foot+ (en clair)
+udp://@2391.192.2.239:8208
+#EXTINF:0,1. TF1 HD
+udp://@232.0.1.205:8208
+#EXTINF:0,7. Arte HD
+udp://@232.0.1.202:8208
+#EXTINF:0,12. NRJ 12 HD
+udp://@232.0.1.204:8208
+#EXTINF:0,101. Luxe TV HD
+udp://@232.0.1.200:8208
+#EXTINF:0,125. National Geographic Channel HD
+udp://@232.0.1.206:8208
+#EXTINF:0,50. Tour de France 2007 HD
+udp://@232.0.1.207:8208
+#EXTINF:0,30. RTL9 (Payant)
+udp://@232.0.1.100:8208
+#EXTINF:0,33. AB1 (Payant)
+udp://@232.0.1.101:8208
+#EXTINF:0,61. ESPN Classic (Payant)
+udp://@232.0.1.111:8208
+#EXTINF:0,62. Sailing Channel (Payant)
+udp://@232.0.1.112:8208
+#EXTINF:0,92. Boomerang (Payant)
+udp://@232.0.1.113:8208
+#EXTINF:0,95. Mangas (Payant)
+udp://@232.0.1.107:8208
+#EXTINF:0,103. Escales (Payant)
+udp://@232.0.1.104:8208
+#EXTINF:0,103. Escales (Payant)
+udp://@232.0.1.119:8208
+#EXTINF:0,104. Encyclopedia (Payant)
+udp://@232.0.1.108:8208
+#EXTINF:0,104. Encyclopedia (Payant)
+udp://@232.0.1.118:8208
+#EXTINF:0,105. Animaux (Payant)
+udp://@232.0.1.102:8208
+#EXTINF:0,106. Chasse & Peche (Payant)
+udp://@232.0.1.103:8208
+#EXTINF:0,107. Toute l'Histoire (Payant)
+udp://@232.0.1.105:8208
+#EXTINF:0,131. Action (Payant)
+udp://@232.0.1.106:8208
+#EXTINF:0,131. Action (Payant)
+udp://@232.0.1.117:8208
+#EXTINF:0,132. Cine Polar (Payant)
+udp://@232.0.1.109:8208
+#EXTINF:0,133. Cine FX (Payant)
+udp://@232.0.1.110:8208
+#EXTINF:0,133. Zik / XXL (Payant)
+udp://@232.0.1.114:8208
+#EXTINF:0, Playlist pour Bouquet TV Orange v1.61 concue par (c) porciello.com
+http://www.porciello.com/inventel/
+#EXTINF:0, Plus d'infos sur http://www.porciello.com/inventel/tv_vlc.htm
+http://www.porciello.com/inventel/tv_vlc.htm

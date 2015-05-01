@@ -1,0 +1,93 @@
+#!/bin/sh
+#
+#    <Script to encode AVI file of a directory in DV files>
+#    Copyright (C) 2008 - Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#		Version 0.2 up to August 2009, 4th
+#		\version 0.3 
+#		
+#		\author Laurent Guignard<lguignard.debian@gmail.com>
+#
+#		January 7th 2008
+# 	January 7th 2008 	Version 0.2 with correction of bug which keeped 
+#														the original file extension name instead of .dv 
+#														file extension
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+#		\todo test if files are really DivX files 
+#		\note This script seems to be fully operational at january 7th 2008
+#		
+
+TARGET_DIR="target"
+FFMPEG_BIN=`which ffmpeg`
+
+#
+# Function to describe script usage
+function usage() {
+	echo 
+	echo -e "Version 0.2 of $0"
+	echo 
+	echo -e "$0 usage"
+	echo -e "-------------------------------------------------------------------------------"
+	echo -e "\tThis script is designed to encode all AVI files of a directory"
+	echo -e "\tinto DV file format"
+	echo 
+	echo -e "\t\t$0 param"
+	echo
+	echo -e "\t\tparam : This parameter is the target directory where all "
+	echo -e "\t\tAVI files to encode are stored"
+	echo 
+}
+
+
+#
+# Function to encode all AVI files of the directory
+#		\param $1 Path to reach DivX target files
+function transforme() {
+	echo -e "AVI files encoding..."
+	FILELIST=`find "$1" -type f -maxdepth 1`
+	if [ ! -d "$1/$TARGET_DIR" ]; then
+		echo "Creating target directory : $1/$TARGET_DIR "
+		mkdir -p "$1/$TARGET_DIR"
+	fi
+	for i in $FILELIST; do
+		# Create here type file testing procedure
+		FILENAME=`basename $i | awk -F . '{print $1}'`
+		FILENAME="$FILENAME.dv"
+#		$FFMPEG_BIN -i "$i" -target pal-dv "$1/$TARGET_DIR/$FILENAME"
+		ffmpeg -i "$i" -target pal-dv "$1/$TARGET_DIR/$FILENAME"
+	done
+
+}
+
+
+#
+# Main program
+if [ $# -eq 0 ]; then
+	usage
+	exit -1
+fi
+
+if [ -d "$1" ]; then
+	transforme "$1"
+else
+	usage
+fi
+

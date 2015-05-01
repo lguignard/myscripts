@@ -1,0 +1,25 @@
+.TH my-clear-iptables 1 
+.SH NAME
+my-clear-iptables \- netfilter rules wiper
+.SH SYNOPSIS
+.B my-clear-iptables
+.br
+.SH DESCRIPTION
+This script is used to clear all IP filter rules set on the host and 
+fix to ACCEPT target as default policy.
+.PP
+You need to have root access on host to run this script. 
+.B iptables
+and 
+.B iptables-save
+need this access level to handle IP filter rules. I some special cases you 
+could use sudo or a "set uid" bit to theses commands.
+.SH SEE ALSO
+.BR iptables (1),
+.BR iptables-save (1),
+.BR sudo (1)
+.SH AUTHOR
+my-clear-iptables was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

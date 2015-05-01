@@ -1,0 +1,19 @@
+.TH my-photo-sign 1 
+.SH NAME
+my-photo-sign \- script to add signature to image
+.SH SYNOPSIS
+.B my-photo-sign filename
+.SH DESCRIPTION
+This script is used to add signature to image
+.PP
+.B filename
+The only argument is the file name of the image to add signature.
+.PP
+.SH SEE ALSO
+.BR imagemagick (1),
+.BR convert (1)
+.SH AUTHOR
+my-photo-sign was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

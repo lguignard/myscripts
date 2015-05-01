@@ -1,0 +1,25 @@
+.TH my-savesvn 1 
+.SH NAME
+my-savesvn \- Save an subversion repository
+.SH SYNOPSIS
+.B my-savesvn repository_directory backup_filename
+.br
+.SH DESCRIPTION
+This script save the subversion directory in a text file.
+The repository has to be on the local filesystem.
+It is a basic script that need to be improved.
+.P
+.RS
+.B repository_directory
+    Directory on the local filesystem that support the subversion repository
+.B backup_filename
+    Complete filename (filename and path) in which the repository has to be saved.
+.RE
+.PP
+.SH SEE ALSO
+.BR svnadmin (1)
+.SH AUTHOR
+my-savesvn was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

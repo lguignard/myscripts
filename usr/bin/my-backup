@@ -1,0 +1,288 @@
+#!/bin/sh
+#
+#   <Script to backup data>
+#   Copyright (C) 2007  Laurent Guignard
+#
+#		\date 2007-2008 Laurent Guignard<lguignard.debian@gmail.com>
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#   \date 2009 August, 4 Laurent Guignard<lguignard.debian@gmail.com> Change
+#   shell executed by default from Bash to sh to suite Debian politic about 
+#   shell change to Dash
+#
+#	\todo
+#		- Need to check the memory capacity of the backup device
+#		- Need to test the SSH remote backup 
+#		- Need to test when burning a DVD
+#
+
+
+DATE=`date --date 'now' +%d-%m-%Y-%H-%M`
+
+# Variables de commandes
+TAR=`which tar`
+SSH=`which ssh`
+SCP=`which scp`
+MOUNT=`which mount`
+UMOUNT=`which umount`
+DVDRECORD_BIN=`which dvdrecord`
+GENISOIMAGE_BIN=`which genisoimage`
+GROWISOFS_BIN=`which growisofs`
+SUDO_BIN=`which sudo`
+
+
+if [ -f /etc/default/my-backup ]; then
+	. /etc/default/my-backup
+else
+	echo "No configuration file found !"
+	exit -1
+fi
+
+
+#
+# Usage function
+function usage() {
+	echo "$0 usage : "
+	echo
+	echo " Command:"
+	echo -e "\t$0 device [params] [params]"
+	echo 
+	echo -e "\tParameters description:"
+	echo -e "\tdevice:"
+	echo -e "\t\tThis parameter set the device on which the backup will be done"
+	echo -e "\t\tdvd : Backup will be burned on DVD."
+	echo -e "\t\tThis command could accept a second parameter. If this one exists, all further parameter are supposed "
+	echo -e "\t\tto be files or directories list to backup. Actually no test on these paramieters is done."
+	echo
+	echo -e "\t\tfile : Data are saved in file \"tar.gz\" with its entire path."
+	echo -e "\t\tThe second argument is the backup file name with full path without any extension (it will be add automatically)."
+	echo -e "\t\tOther arguments are a file and directories to backup."
+	echo
+	echo -e "\t\tusb : Data are saved in file \"tar.gz\" on the USB device."
+	echo -e "\t\tThe second argument is the backup file name with full path without any extension (it will be add automatically)."
+	echo
+	echo -e "\t\tssh : Data are saved in file \"tar.gz\" on a remote host via SSH protocol."
+	echo -e "\t\tThe second argument is the backup file name with full path without any extension (it will be add automatically)."
+	echo
+	echo "Caution :"
+	echo -e "\tThis script doesn't verify if there enough space on the backup destination device."
+	echo -e "\tYou have to check before starting the backup !"
+	echo
+}
+
+
+#
+# Function to save in a local file
+#
+# \remarks This function was tested and is working fine
+function save_in_file() {
+	FILE="$1.tar.gz"
+	LIST="$2"
+
+	if [ -f "$FILE" ]; then
+		echo "$FILE already exists, it will be deleted (CTRL+c to stop) !"
+		rm -f "$FILE"
+	fi
+	$TAR czf "$FILE" $LIST
+}
+
+
+#
+# Function to save with an SSH tunnel
+# \test
+# 	This function need to be tested at home with another host running SSH server
+function save_ssh() {
+	FILE="$1.tar.gz"
+	LIST="$2"
+
+	read -p "Username : " user
+	read -p "Host on which backup will be stored : " host
+	read -p "Remote backup storage path : " directory
+
+	$TAR cz $LIST | ssh $user@$host "cat > $directory/$FILE"
+	if [ $DEST_BACKUP = "t" ]; then
+		if [ $? -ne 0 ]; then
+			echo "Remote backup via SSH failed !"
+		fi
+	fi
+}
+
+
+#
+# Function to save on the USB device
+#
+# \remarks This function was tested and is working fine
+function save_usb() {
+	FILE="$1.tar.gz"
+	LIST="$2"
+	$MOUNT $USB_PATH && $MOUNT | grep -e "${REGEX_USB_PATH}" 2>&1 1>&/dev/null
+	if [ $? -eq 0 ]; then
+		if [ ! -f "$USB_PATH/$FILE" ]; then 
+			$TAR czf "$USB_PATH/$FILE" $LIST
+		else
+			echo "$USB_PATH/$FILE already exist !"
+		fi
+		$UMOUNT $USB_PATH
+	else
+		echo "USB device not mounted"
+	fi
+}
+
+
+#
+# Function to save on a DVD
+# @param $1 variable contenant la liste des données à sauvegarder
+#
+# \test
+# 	Need to test this function in order to validate 
+function save_dvd() {
+	if [ $DEBUG == true ]; then
+		echo "$@"
+	fi
+
+	for dir in "$@" ; do
+		echo $dir
+		if test -d "$dir"; then
+#newdir=`echo "$dir" | sed -e 's/\.//' | awk -F '/' '{ print $NF }'`
+			newdir=$dir
+
+			if test -z "$data_to_save"; then
+				data_to_save="$newdir/=$dir"
+			else
+				data_to_save="$data_to_save $newdir/=$dir"
+			fi
+		else
+			if test -f "$dir"; then
+				if test -z "$data_to_save"; then
+					data_to_save="$dir"
+				else
+					data_to_save="$data_to_save $dir"
+				fi
+			fi
+		fi
+	done
+	data_to_save=`echo "$data_to_save" | sed -e 's/\/\//\//g'`
+	if test $DEBUG == true; then
+		echo "Data to backup : $data_to_save"
+	fi
+	$GROWISOFS_BIN -Z $DVD_DEV -iso-level 3 -V "Backup" -input-charset utf-8 -graft-points -overburn $data_to_save
+}
+
+
+#
+# Function to compute the total size of data
+# @param $* variable contenant la liste des données à sauvegarder
+# @todo
+#		- Need to work on algorithm in order to check the size of backup and the destination device capacity
+function eval_size() {
+	tab=$@
+	needed_size=`du -ch ${tab[*]} | grep total | awk '{ print $1 }'`
+	echo -n "Total size : "
+	echo $needed_size | grep -e 'K$' 
+	if test $? -eq 0; then
+		# Traitement de kilo octets
+		echo ${needed_size/K/}
+	else
+		echo $needed_size | grep -e 'M$'
+		if test $? -eq 0; then 
+			# Traitement de Mega octets
+			echo ${needed_size/G/}
+		else
+			echo $needed_size | grep -e 'G$'
+			if test $? -eq 0; then
+				# Traitement de Giga octets
+				echo ${needed_size/G/}
+			else
+				# Unité de mesure non déterminée
+				echo "Error, unity not found"
+			fi
+		fi
+	fi
+}
+
+
+
+
+#
+# Main part of script
+if test -f $DATA_LOCATION_FILE; then
+	if test -d $TMP_IMAGE; then
+		rm -rf $TMP_IMAGE
+	fi
+	. $DATA_LOCATION_FILE
+else
+	echo -e "Error no data file found !"
+	exit 1
+fi
+
+case "$1" in 
+	file)
+		if test $# -eq 1;	then
+			save_in_file "$2" "$USER_SYSTEM"
+		else
+			dest="$2"
+			shift # The two first parameters are device and backup destination
+			shift	#
+			var=$@
+			eval_size "$var"
+			save_in_file "$dest" "$var"
+		fi
+		;;
+	ssh)
+			save_ssh "$2" "$3" # Argument 1 : file target .tar.gz of the backup, argument 2 all files to backup
+		;;
+	dvd)
+		if test -z "$2"; then
+			if [ $USER_SYSTEM ]; then
+				save_dvd "$USER_SYSTEM"
+			fi
+		else
+			var=$@
+			shift
+			shift
+			save_dvd "$@"	# Sauvegarde des données passées en paramètre numéro 2. Si plusieurs choses à sauvegarder alors les mettre en guillements (un seul paramètre)
+		fi
+		;;
+	usb)
+		if test $# -eq 1; then
+			save_usb "$2" "$USER_SYSTEM"
+		else
+			dest="$2"
+			shift
+			shift
+			var=$@
+			save_usb "$dest" "$var"
+		fi
+		;;
+	system)
+		echo "Making a backup of your system on a DVD ..."
+		RIGHTS=`$SUDO_BIN -l | grep '(ALL) ALL'` 2>&1 1>/dev/null
+#		echo $RIGHTS 
+		if [ $? -eq 0 ]; then
+			echo "OK for sudo rights..."
+#			dpkg -l > /tmp/liste_packages.txt
+#			$SUDO_BIN save_dvd "/etc /tmp/liste_packages.txt /var /boot " 
+		else
+			echo "No rights here..."
+		fi
+		;;
+	*)
+		usage
+		;;
+esac
+
+
+
+

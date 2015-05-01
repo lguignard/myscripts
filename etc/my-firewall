@@ -1,0 +1,313 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          firewall.sh
+# Required-Start:    $remote_fs $network $syslog
+# Required-Stop:     $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Set firewall rules a boot time
+# Description:       Set all firewalling rules a boot time
+### END INIT INFO
+#
+#    <Script to setup firewall rules>
+#    Copyright (C) 2006  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#		 Modified 2007 by Laurent Guignard
+#				- Add support of smbfs to be Microsoft compliant
+#				- Add support of RTSP (Network video streaming...)
+#		 Update 8 Nov 2009 by Laurent Guignard
+#       - change the LOG prefix with iptables: ....
+#
+#		Activation des modules du noyau
+#
+#		Mise en place des variables globales pour les programmes
+#
+#		1 - Suppression de toutes les règles existantes
+#		2 - Réglage des divers paramètres possibles du noyau...
+#		3	-	Mise en places des règles particulières
+#		4 - Application des règles
+#
+#
+
+
+
+IPTABLES=`which iptables`
+MODPROBE=`which modprobe`
+IP=`which ip`
+EGREP=`which egrep`
+AWK=`which awk`
+
+LO="lo"
+LOCAL_NETWORK="192.168.1.0"
+LOCAL_NETWORK="192.168.1.0/24"
+LOOPBACK="127.0.0.1"
+ROUTER="192.168.1.1"
+
+#
+# Fonction permettant de lister les interfaces de la machine
+get_interfaces() {
+	INTERFACES=`$IP link show | $EGREP '^[0-9]*:' | $AWK -F: '{print $2}'`
+	export INTERFACES
+}
+
+#
+# Fonction permettant de réaliser la protection au niveau du noyau
+set_kernel_security() {
+	echo "Set kernel security."
+	echo 1 >/proc/sys/net/ipv4/tcp_syncookies					# TCP syn flooding protection
+#	echo 1 > /proc/sys/net/ipv4/conf/all/rp_filter					# Source validation
+	echo 0 > /proc/sys/net/ipv4/conf/all/accept_redirects				#
+	echo 1 > /proc/sys/net/ipv4/conf/all/log_martians				#
+	echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts				#
+#	echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_all				#
+#	echo 1 > /proc/sys/net/ipv4/icmp_ignore_bogus_error_responses
+#	echo "4 4 1 7"> /proc/sys/kernel/printk
+#	echo "1" > /proc/sys/net/ipv4/ip_forward
+}
+
+#
+# Fonction pemrettant la mise en place des règles par défaut
+set_default_rules() {
+	echo "Set firewalling policies."
+	$IPTABLES -F 
+	
+	echo -en "\tDrop all policy : "
+	$IPTABLES -P INPUT DROP
+	$IPTABLES -P FORWARD DROP
+	$IPTABLES -P OUTPUT DROP
+	echo " Done."
+
+	echo -en "\tSet local policy : "
+	$IPTABLES -A INPUT -i $LO -j ACCEPT
+	$IPTABLES -A OUTPUT -o $LO -j ACCEPT
+	echo " Done."
+
+	echo -en "\tSet IGMP specific policy : "
+	$IPTABLES -A INPUT -p igmp -j ACCEPT
+	$IPTABLES -A OUTPUT -p igmp -j ACCEPT
+	$IPTABLES -A FORWARD -p igmp -j ACCEPT
+	echo " Done."
+
+	echo -ne "\tSet LAN policy : "
+	$IPTABLES -A INPUT -s $LOCAL_NETWORK -j ACCEPT
+	$IPTABLES -A OUTPUT -d $LOCAL_NETWORK -j ACCEPT
+	echo " Done."
+
+	$IPTABLES -A OUTPUT -d $LOOPBACK -j ACCEPT
+
+
+	echo -ne "\tSet Multicast DNS policy : "
+# $IPTABLES -A INPUT -p udp --dport 5353 -j ACCEPT
+#	$IPTABLES -A INPUT -p udp --sport 5353 -j ACCEPT
+	echo " Done."
+
+	echo -ne "\tSet LOG_DROP policy : "
+	$IPTABLES -N LOG_DROP
+	$IPTABLES -A LOG_DROP -m limit --limit 5/minute -j LOG  --log-level 4 --log-prefix "iptables: LOGDROP " --log-tcp-sequence  --log-tcp-options --log-ip-options
+	$IPTABLES -A LOG_DROP -j DROP
+	echo " Done."
+
+	echo -ne "\tSet LOG_ACCEPT policy : "
+	$IPTABLES -N LOG_ACCEPT
+	$IPTABLES -A LOG_ACCEPT -m limit --limit 5/minute -j LOG  --log-level 4 --log-prefix "iptables: LOGACCEPT " --log-tcp-sequence  --log-tcp-options --log-ip-options
+	$IPTABLES -A LOG_ACCEPT -j ACCEPT
+	echo " Done."
+
+	echo -ne "\tSet LOG_INFO policy : "
+	$IPTABLES -N LOG_INFO
+	$IPTABLES -A LOG_INFO -m limit --limit 5/minute -j LOG  --log-level 4 --log-prefix "iptables: LOGACCEPT " --log-tcp-sequence  --log-tcp-options --log-ip-options
+	$IPTABLES -A LOG_INFO -j ACCEPT
+	echo " Done."
+}
+
+
+#
+# Fonction permettant de fixer les règles de filtrage
+set_filtering_rules() {
+	echo "Mise en place des regles de filtrage..."
+#	get_interfaces
+	set_kernel_security
+	set_default_rules
+	transform_rule
+}
+
+
+#
+# Fonction permettant la transformation XSLT
+transform_rule() {
+	accept_input
+	accept_forward
+	accept_output
+}
+
+
+#
+#
+accept_input() {
+	echo -en "\tSet INPUT policy : "
+
+#---------- IGMP -------------
+	$IPTABLES -A INPUT -s $ROUTER -p igmp -j ACCEPT
+
+#---------- ICMP -------------
+	$IPTABLES -A INPUT -p icmp -s $LOCAL_NETWORK  $icmp --icmp-type echo-reply -j ACCEPT
+
+
+#---------- UDP --------------
+	$IPTABLES -A INPUT -p udp -s $LOCAL_NETWORK --sport 1024: --dport 53 -j ACCEPT
+	$IPTABLES -A INPUT -p tcp -s $LOCAL_NETWORK --sport 1024: --dport 53 -j ACCEPT
+	$IPTABLES -A INPUT -p udp -s $LOCAL_NETWORK --sport 53 -j ACCEPT		# DNS
+	$IPTABLES -A INPUT -p tcp -s $LOCAL_NETWORK --sport 953 -j ACCEPT		# RNDC
+	$IPTABLES -A INPUT -p udp --sport 67 -j ACCEPT		# DHCP
+	$IPTABLES -A INPUT -p udp --sport 68 -j ACCEPT		# BOOTP
+	$IPTABLES -A INPUT -p udp -s $LOCAL_NETWORK --sport 123 -j ACCEPT		# NTP
+
+	# Tous flux UDP
+	$IPTABLES -A INPUT -p udp -s $LOCAL_NETWORK --sport 1024: --dport 1024: -j ACCEPT						
+
+
+#---------- TCP --------------
+	# FTP 
+#	$IPTABLES -A INPUT -p tcp --dport 20 -m state --state NEW,ESTABLISHED -j LOG --log-level 4 --log-prefix "iptables: LOGFTP "
+	$IPTABLES -A INPUT -p tcp --dport 20 -m state --state NEW,ESTABLISHED -j LOG_ACCEPT
+#	$IPTABLES -A INPUT -p tcp --sport 20 -m state --state ESTABLISHED -j	ACCEPT
+#	$IPTABLES -A INPUT -p tcp --dport 21 -m state --state ESTABLISHED -j LOG --log-level 4 --log-prefix "iptables: LOGFTP "
+	$IPTABLES -A INPUT -p tcp --dport 21 -m state --state ESTABLISHED -j LOG_ACCEPT
+#	$IPTABLES -A INPUT -p tcp --sport 21 -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+	# SSH
+	$IPTABLES -A INPUT -p tcp --dport 22 -m state --state NEW -m recent --update --seconds 60 --hitcount 4 --rttl --name SSH -j LOG_DROP
+	$IPTABLES -A INPUT -p tcp --dport 22 -m state --state NEW -s $LOCAL_NETWORK -j ACCEPT
+
+	# SMTP
+	$IPTABLES -A INPUT -p tcp --sport 25 -s $LOCAL_NETWORK -j ACCEPT
+	$IPTABLES -A INPUT -p tcp --sport 25 -s $LOOPBACK -j ACCEPT
+	$IPTABLES -A INPUT -p tcp --dport 25 -s $LOCAL_NETWORK -j ACCEPT
+	$IPTABLES -A INPUT -p tcp --dport 25 -s $LOOPBACK -j ACCEPT
+	$IPTABLES -A INPUT -p tcp --dport 25 -j LOG_DROP
+
+
+	$IPTABLES -A INPUT -p tcp -s $LOCAL_NETWORK --sport 1024: --dport 443 -j ACCEPT
+	$IPTABLES -A INPUT -p tcp -s $LOOPBACK --sport 1024: --dport 443 -j ACCEPT
+	$IPTABLES -A INPUT -p tcp --dport 443 -j LOG_DROP
+	$IPTABLES -A INPUT -p tcp --sport 443 -j LOG_DROP
+
+
+	# LDAP
+	$IPTABLES -A INPUT -s $LOOPBACK -p tcp --dport 389 -j ACCEPT 
+# 	$IPTABLES -A INPUT -s $LOOPBACK -p tcp -j ACCEPT 
+
+	# RTSP
+	$IPTABLES -A INPUT -p tcp --dport 554 -j ACCEPT
+
+	# RNDC (named)
+	$IPTABLES -A INPUT -p tcp --dport 953 -j ACCEPT
+
+
+
+	# RSYNC
+	#$IPTABLES -A INPUT -i $1 -s 127.0.0.1 -p tcp --sport 873 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+
+	# IMAPS
+	#$IPTABLES -A INPUT -i $1 -s 127.0.0.1 -p tcp --sport 993 -m state --state ESTABLISHED,RELATED -j ACCEPT
+#
+
+	#MYSQL
+	#$IPTABLES -A INPUT -i $1 -s 127.0.0.1 -p tcp --dport 3306 -j ACCEPT
+	#$IPTABLES -A INPUT -i $1 -s 127.0.0.1 -p tcp --dport 5432 -j ACCEPT
+
+	# Toute connexion établie prealablement
+	$IPTABLES -A INPUT -p tcp -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+	# Toutes connexions 
+	#$IPTABLES -A INPUT -i $1 -p tcp --sport 1024:65535 --dport 1024:65535 -m limit --limit 1/minute -j ULOG --ulog-prefix "Ports clients " --log-level 4
+	$IPTABLES -A INPUT -p tcp --sport 1024: --dport 1024: -m limit --limit 5/minute -j LOG_DROP
+
+	# PROXY connexion établie depuis le port 8080 (réponse d'un PROXY)	
+	#$IPTABLES -A INPUT -i $1 -p tcp --sport 8080 -m state --state ESTABLISHED -j ACCEPT
+
+#------- Default ------------
+#	$IPTABLES -A INPUT -j LOG_INFO
+	echo " Done."
+}
+
+
+#
+#
+accept_forward() {
+	echo -en "\tSet FORWARD policy : "
+#	$IPTABLES -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+#	$IPTABLES -A FORWARD -i $1 -j LOG_DROP 
+	#$IPTABLES -t nat -A PREROUTING -p tcp -m tcp --dport 2025 -j REDIRECT --to-ports 25
+	echo " Done."
+}
+
+
+#
+#
+accept_output() {
+	echo -ne "\tSet OUTPUT policy : "
+	
+
+#---------- ICMP -------------
+	$IPTABLES -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
+	$IPTABLES -A OUTPUT -d $ROUTER -p icmp --icmp-type echo-reply -j ACCEPT
+	$IPTABLES -A OUTPUT -d $ROUTER -p icmp --icmp-type port-unreachable -j ACCEPT
+	$IPTABLES -A OUTPUT -d $LOCAL_NETWORK -p icmp --icmp-type echo-reply -j ACCEPT
+	$IPTABLES -A OUTPUT -d $LOCAL_NETWORK -p icmp --icmp-type port-unreachable -j ACCEPT
+	$IPTABLES -A OUTPUT -p icmp --icmp-type echo-reply -j LOG_DROP
+
+
+	$IPTABLES -A OUTPUT -p udp -d $LOCAL_NETWORK --j ACCEPT
+	$IPTABLES -A OUTPUT -p tcp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+	$IPTABLES -A OUTPUT -p tcp --sport 953 -j ACCEPT
+
+#	$IPTABLES -A OUTPUT -p tcp -j LOG_INFO
+	echo " Done."
+}
+
+
+
+#
+# Fonction principale : départ du programme
+$MODPROBE ip_conntrack_ftp
+$MODPROBE ip_conntrack_irc
+$MODPROBE ip_conntrack_tftp
+$MODPROBE ip_conntrack_amanda
+
+case "$1" in 
+	start)
+		set_filtering_rules
+	;;
+	stop)
+		$IPTABLES -F
+		$IPTABLES -X 
+		$IPTABLES -P INPUT ACCEPT
+		$IPTABLES -P FORWARD ACCEPT
+		$IPTABLES -P OUTPUT ACCEPT
+	;;
+	reload)
+		$0 restart
+	;;
+	restart)
+		$0 stop
+		$0 start
+	;;
+esac
+
+

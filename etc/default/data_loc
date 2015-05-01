@@ -1,0 +1,123 @@
+# Mozilla root profile
+MOZ_PROF="$HOME/.mozilla"
+
+# Bookmarks Firefox
+FX_BKS=`find "$MOZ_PROF" -name "bookmarks.html" -print`
+FX_ENTIRE="$MOZ_PROF/*.default"
+
+# Local mailbos from Thunderbird
+THUNDER_MBX="$HOME/Mail "
+
+# Sunbird SDB files
+SUNBIRD_DIR="$MOZ_PROF/sunbird"
+SUNBIRD_SDB=`find "$SUNBIRD_DIR" -name '*.sdb' -print` # Constuction de la liste des fichiers SUNBIRD
+
+# Construction de la liste des extensions MOZILLA
+EXT_MOZ=`find "$MOZ_PROF" -name "*.xpi" -print`
+
+# Thunderbird profiles
+THUNDER_PROFIL="$HOME/.mozilla-thunderbird/*.default "
+
+# All Mozilla tools
+ALL_MOZ="$FX_BKS $FX_ENTIRE $THUNDER_MBX $THUNDER_PROFIL $SUNBIRD_DIR " # $SUNBIRD_SDB  $EXT_MOZ "
+
+
+#----------------------------------
+# Fluxbox base directory
+FLBX_BASE="$HOME/.fluxbox"
+
+# Conky (Not included by default)
+# To add : add $MY_CONKY to ALL_FLUXBOX variable
+MY_CONKY="$HOME/.conkyrc "
+
+# WmWork
+MY_WMWORK="$HOME/.wmwork "
+
+# All Fluxbox
+ALL_FLUXBOX="$FLBX_BASE $MY_WMWORK $MY_CONKY"
+
+
+#----------------------------------
+# GNOME Appli
+
+# Tomboy
+TOMBOY_DIR="$HOME/.tomboy"
+
+# All GNOME Appli
+ALL_GNOME="$TOMBOY_DIR "
+
+
+
+#----------------------------------
+# My binaries files
+
+# Java bin
+MY_JAVA="$HOME/SUNWappserver "
+# All installed binaries
+MY_BIN="$HOME/bin "
+
+# All binaries
+ALL_BIN="$MY_JAVA $MY_BIN"
+
+#----------------------------------
+#	All security data
+
+# gnupg data
+GNUPG_DIR="$HOME/.gnupg"
+
+# SSH data
+SSH_DIR="$HOME/.ssh"
+
+# All security data
+ALL_SECURITY="$GNUPG_DIR $SSH_DIR"
+
+
+#----------------------------------
+# Openoffice parameters
+OOO_DIR="$HOME/.openoffice.org2 "
+
+#----------------------------------
+# AMSN data
+AMSN_DIR="$HOME/.amsn"
+
+#----------------------------------
+# xsession file
+XSESSION_FILE="$HOME/.xsession"
+
+#----------------------------------
+# Subversion files
+SUBVERSION_DIR="$HOME/.subversion"
+
+#----------------------------------
+# Bash configuration files
+ALL_BASH_CONF="$HOME/.bash*"
+
+#----------------------------------
+# Debian dev config
+ALL_DEBIAN_CONF="$HOME/.devscripts* "
+
+#----------------------------------
+# All developement files
+ALL_DEV_CONF="$SUBVERSION_DIR"
+
+
+#----------------------------------
+# /etc
+ETC_DIR="/etc"
+
+
+# All application parameters
+USER_SYSTEM="$OOO_DIR $AMSN_DIR $XSESSION_FILE $SUBVERSION_DIR $TOMBOY_DIR "
+USER_SYSTEM="$USER_SYSTEM $MY_CONKY $MY_WMWORK $ALL_BASH_CONF $AMSN_DIR"
+USER_SYSTEM="$USER_SYSTEM "
+
+#----------------------------------
+# Données personnelles
+ALL_DATA="$ALL_FLUXBOX $ALL_GNOME $ALL_SECURITY ALL_BASH_CONF $ALL_DEBIAN_CONF" 
+ALL_DATA="$ALL_DATA $ALL_DEV_CONF $ALL_MOZ"
+
+
+
+
+
+

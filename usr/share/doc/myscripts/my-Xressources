@@ -1,0 +1,9 @@
+*VT100*foreground:  grey
+*VT100*background:  black
+*VT100*cursorColor: yellow
+xterm*VT100*font:  -efont-fixed-medium-r-*-*-16-*-*-*-*-*-iso10646-*
+xterm*VT100*font2: -efont-fixed-medium-r-*-*-10-*-*-*-*-*-iso10646-*
+xterm*VT100*font3: -efont-fixed-medium-r-*-*-12-*-*-*-*-*-iso10646-*
+xterm*VT100*font4: -efont-fixed-medium-r-*-*-14-*-*-*-*-*-iso10646-*
+xterm*VT100*font5: -efont-fixed-medium-r-*-*-16-*-*-*-*-*-iso10646-*
+xterm*VT100*font6: -efont-fixed-medium-r-*-*-24-*-*-*-*-*-iso10646-*

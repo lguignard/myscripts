@@ -1,0 +1,3 @@
+#!/bin/sh
+
+wget -O $HOME/Desktop/gmapsupp.img.zip http://garmin.openstreetmap.fr/garmin-lann/gmapsupp.img.zip

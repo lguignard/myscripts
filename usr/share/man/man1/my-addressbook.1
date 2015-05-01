@@ -1,0 +1,40 @@
+.TH my-addressbook 1 
+.SH NAME
+my-addressbook \- create an addressbook to Mutt formated file
+.SH SYNOPSIS
+.B my-addressbook [OPTION]
+.SH DESCRIPTION
+This script display a list of aliases, according to Mutt aliases file format,
+to STDOUT.
+.PP
+This script could be used to refresh an aliases list from and LDAP directory.
+It need to be update to suite identification needs.
+.SH Options
+.I groups / g
+Option to only parse groupOfNames LDAP objects and build the group list for 
+MUTT.
+.PP
+.I contacts / c
+Option to parse inetOrgPerson LDAP objects and build the list of contacts 
+for MUTT.
+.PP
+.I list / l
+Option to generate a list of members for each groupOfNames object of the 
+LDAP directory as text.
+.PP
+.I html / h
+Option to generate a list of members for each groupOfNames object of the 
+LDAP directory as XHTML.
+.PP
+Default option only build the contacts list to keep the compatibility with 
+the previous version of this script.
+Twice options can be used to build a complete list at the same time.
+.SH SEE ALSO
+.BR ldapsearch (1)
+.BR Net::LDAP (3pm)
+.BR Net::LDAP::Entry (3pm)
+.SH AUTHOR
+my-addressbook was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

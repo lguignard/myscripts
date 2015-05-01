@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+#    <Script to stop my system desktop from my laptop via SSH and 
+#     just after hibernate my laptop>
+#    Copyright (C) 2008 - Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+if [ $RUSERNAME="" ]; then
+	RUSERNAME=`whoami`
+fi
+
+if [ $RHOST="" ]; then
+	RHOST="debian"
+fi
+
+HIBERNATE_COMMAND="/sbin/hibernate"
+SSH_BIN="/usr/bin/ssh"
+
+# Halting the remote system which username provided as first argument
+/usr/bin/ssh $RUSERNAME@$RHOST /usr/bin/sudo $HALT_COMMAND
+
+# Halting local system
+/usr/bin/sudo $HIBERNATE_COMMAND
+

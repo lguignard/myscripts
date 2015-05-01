@@ -1,0 +1,20 @@
+#
+# This script export a variable "$answer" with the key stroke by user in 
+# lower case
+#
+# If no value is passed as argument, this script ask the answer
+
+
+
+OK='y'
+
+test_yes_no() {
+	if [ ! $1 ]; then
+		read answer
+	else
+		answer=`echo $1 | tr -s '[:upper:]' '[:lower:]'`
+	fi
+	
+	export $answer
+}
+	

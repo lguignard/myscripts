@@ -1,0 +1,16 @@
+Source: myscripts
+Section: shells
+Priority: extra
+Maintainer: Laurent Guignard <lguignard.debian@gmail.com>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.9.4
+
+Package: myscripts
+Architecture: all
+Depends: ${misc:Depends}, scrot, iptables
+Description: My shell scripts
+ Myscript package contains all personal shell scripts.
+ This package shall  be used in future system installation 
+ to provide all scripts in single system operation. This will 
+ increase host installation speed.
+

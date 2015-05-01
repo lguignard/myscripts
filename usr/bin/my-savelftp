@@ -1,0 +1,18 @@
+#!/bin/bash    
+HOST="ftp.famille-guignard.org"
+USER="familleguignard"
+PASS="linlu06"
+LCD="/home/metro-gi/Documents"
+RCD="/Backup/Documents"
+
+lftp -c "set ftp:list-options -a;
+open ftp://$USER:$PASS@$HOST; 
+lcd $LCD;
+cd $RCD;
+mirror --reverse \
+--delete \
+--verbose \
+--exclude-glob a-dir-to-exclude/ \
+--exclude-glob a-file-to-exclude \
+--exclude-glob a-file-group-to-exclude* \
+--exclude-glob other-files-to-exclude"

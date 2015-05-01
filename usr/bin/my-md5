@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+#
+#    <Script to encrypt as MD5 hex>
+#    Copyright (C) 2011  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+
+# Functional style
+use Digest::MD5 qw(md5 md5_hex md5_base64);
+
+print "Enter the wor too encrypt as MD5 hex : ";
+chop($data = <STDIN>);
+$digest = md5_hex($data);
+print "$digest\n";

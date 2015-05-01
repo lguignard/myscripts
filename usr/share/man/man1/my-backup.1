@@ -1,0 +1,77 @@
+.TH my-backup 1
+.SH NAME
+backup \- script to manage backups of a laptop
+.SH SYNOPSIS
+.B backup
+.BR
+.SH DESCRIPTION
+This script has been done to suite the laptop backup need. It's need more work
+but some feature could be used (at your own risk) and others could be useful.
+.PP
+This backup needs several configuration files that are described below.
+.PP 
+.B /etc/default/my-backup
+This file is used to set all parameters of backup script. All parameters have 
+to be set by environment varibales.
+.PP
+.BR
+.B DEBUG
+This is the debug level of script. It could take two values : "true" or "false"
+.PP
+.BR
+.B USB_PATH
+This variable this path where USB devices are mounted on the local 
+filesystem. 
+.I In example /media/usb.
+.PP
+.BR
+.B REGEX_USB_PATH="\\\/media\\\/usb"
+This variable is used to set the regular expression associated to the USB 
+devices local filesystem mount directory.
+.PP
+.BR
+.B DVD_DEV="/dev/dvdrw"
+This variable is used to set the DVD burned device entry in the local 
+filesystem.
+.PP
+.BR
+.B DEST_BACKUP="f"
+This variable will be removed soonly because it seems it isn't useful.
+.PP
+.BR
+.B DEST_HOST="fixe"
+This variable is used to set the hostname of the remote backup host.
+.PP
+.BR
+.B DEST_NAME=`whoami`
+This variable is used to set the remote authentication user identifier.
+.PP
+.BR
+.B DEST_PATH="$HOME/sauve"
+This variable is used to set the path on the remote host where the backup 
+will be stored.
+.PP
+.BR
+.B DATA_LOCATION_FILE="$HOME/tmp/data_loc"
+This variable is used to set all environment variables needed by the backup
+process. All these environment variable could be set in another file to suite 
+your needs. Only their name is relevant.
+.PP
+.BR
+.B DEST_LOC="/tmp"
+This variable is set to the local back patch destination.
+.PP
+.BR
+.B TMP_IMAGE="$DEST_LOC/my_image"
+This variable was used with anther version of my-backup script that use the 
+old cdrecord/dvdrecord software that need an CD/DVD image.
+.PP
+.SH SEE ALSO
+.BR ssh (1),
+.BR rsync (1),
+.BR tar (1)
+.SH AUTHOR
+my-backup was written by Laurent Guignard <lguignard.debian@gamil.com>
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

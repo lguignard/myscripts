@@ -1,0 +1,40 @@
+.TH my-debref 1
+.SH NAME
+my-debref \- tool to maintain a debian repository
+.SH SYNOPSIS
+.B my-debref
+.RI "source_dir" "distribution" "section"
+.br
+.SH DESCRIPTION
+This script will build all necessary files in a debian repository
+nd upload it to the destination.
+.PP
+.B source_dir 
+local path where packages are located
+.PP
+.B distribution 
+name of the distribution in which the package will be published
+.PP
+.B section
+section in which the package will be published
+.PP
+This script build a local debian repository in which it is possible to store
+all created packages. All package are stored in the same distribution and 
+section. It may be possible to use this script many times on different
+packages and only change distribution or section parameter to create a
+global debian repository as needed.
+.PP
+If you want to use an SSH based deployment method, you have to configure your
+SSH client with your ~/.ssh/config file. If this file isn't set, this script
+will fail.
+.PP
+This script could use the global configuration file /etc/default/my-debref or 
+the personal configuration file ~/.my-debref.
+.SH SEE ALSO
+.BR dkpg-scanpackages (1),
+.BR dpkg-scansources (1)
+.SH AUTHOR
+my-debref was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>
+for the Debian project (but may be used by others).

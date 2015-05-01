@@ -1,0 +1,5 @@
+	- remove all bashisms from scripts
+	- create a script to save package list of a host and restore the same 
+	  configuration (take care about package version to get an up to date 
+		debian box)
+	- 

@@ -1,0 +1,24 @@
+.TH my-pbuilder 1
+.SH NAME
+my-pbuilder \- tool to build Debian package from sources
+.SH SYNOPSIS
+.B my-pbuilder
+[package_name]
+.SH DESCRIPTION
+This script help you to build and debug a Debian package from upstream sources.
+.RS
+.B package_name
+option to set the correct upstream package name (following the Debian policy)
+to overset the upstream package name. This option is used when upstream package 
+doesn't follow package naming and/org versioning Debian policy.
+.RE
+.SH SEE ALSO
+.BR dpkg-buildpackage (1),
+.BR Debian Policy (/usr/share/doc/debian-policy/policy.txt.gz), package 
+.BR debian-policy
+.br
+.SH AUTHOR
+my-pbuilder was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

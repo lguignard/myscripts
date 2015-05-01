@@ -1,0 +1,11 @@
+MYDEBREF_ENABLE="true"
+
+
+#CONNECT_METHOD="ssh"
+CONNECT_METHOD="none"
+CLEAN_TARGET="false"
+
+REMOTEUSER="remoteuser"
+REMOTEPASSWD="password"
+REMOTESERVER="remote_server"
+REMOTEDIR="debian"

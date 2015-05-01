@@ -1,0 +1,106 @@
+#!/bin/sh
+#
+#    <Script to backup on DVD my home directory>
+#    Copyright (C) 2009  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+#		 \Version 0.0.2
+#
+#		 \since 2009 January, 4
+#
+#		 \return 
+#				- 0	backup is done
+#				- 1	configuration file error
+#
+# 	 \todo
+#				- Create a procedure to test if DVD is insert
+# 			- if needed create a procedure to test if DVD is blank
+#
+# 		\note
+# 		This script is the second part of my back system. It relies on 
+# 		my-backup script.
+#			This script can be used if variables usually defined in 
+#			/etc/default/my-savehome.cf file are already defined in SHELL.
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+
+
+# Display how to use this script
+function usage() {
+	echo -e "Usage $0 :"
+	echo -e "SYNOPSIS :"
+	echo -e "\t$0"
+	echo -e "\tIf /etc/default/my-savehome.cf file is defined and filled "
+	echo -e "according to guidelines, everything is ok."
+	echo -e "If you want to use this script without the /etc/default/my-savehome "
+	echo -e "file, you have to set environment variables used by this script."
+	echo -e "\tDEVICE\t: DVD burning device (/dev/dvdrw,...)"
+	echo -e "\tNB_DVD\t: Number of DVD you want to save"
+	echo -e "\tDATA1..X\t: String that contains files and directories names which are to backup"
+	echo -e "\DVD_BLANK\t: true or false according to blanking or not the DVD before burning it"
+}
+
+# Configuration test
+if [ -z $NB_DVD ]; then
+	if [ -f /etc/default/my-savehome.cf ]; then
+		. /etc/default/my-savehome.cf
+	else
+		echo "Can't find the configuration file, and environment"
+		echo "variables are not defined !"
+		exit 1
+	fi
+else
+	i=1
+	while [ $i -lt $NB_DVD ]; do
+		data=`echo "DATA$i"`
+		if [ -z $data ]; then
+			echo "Configuration problem, $data contains no directory to save."
+			echo "You will burn a DVD for nothing !"
+			exit 1
+		fi
+		i=$(($i + 1))
+	done
+fi
+
+# Install software test
+if [ ! -x /usr/bin/my-backup ]; then
+	echo "my-backup script isn't installed."
+	exit 1
+fi
+
+# DVD blanking if requested in 
+if [ $DVD_BLANK == true ]; then 
+	/usr/bin/dvd+rw-format -force=full "$DEVICE"
+fi
+
+
+i=1
+while [ $i -le $NB_DVD ]; do
+	data=`echo "DATA$i"`
+	echo "Backup of data : ${!data}"
+	my-backup dvd ${!data}
+	i=$(($i + 1))
+	if [ $i -ne $NB_DVD ]; then
+		read -p "Change DVD to the next backup support and press a key : "
+	fi
+done
+
+
+exit 0

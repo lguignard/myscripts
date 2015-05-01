@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+#    <Script to RIP orange video >
+#    Copyright (C) 2007  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#
+# Thanks to http://www.porciello.com/ for its playlist
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+PORCIELLO_FILE="BouquetTV_Orange_v1.61.m3u"
+TMP_PLAYLIST=/tmp/Bouquet.tmp.m3u
+
+
+cat $PORCIELLO_FILE | tr [:upper:] [:lower:] | tr [:blank:] '_' > $TMP_PLAYLIST
+
+cat $TMP_PLAYLIST | while true
+	do
+		read ligne
+		if [ "$ligne" = "" ]; then break; fi
+		echo $ligne | grep 'tf1$'
+		if [ $? -eq 0 ]; then
+			echo Cool
+		fi
+	done

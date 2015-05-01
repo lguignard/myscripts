@@ -1,0 +1,48 @@
+#!/bin/sh
+#
+#    <Script to check difference between files in two different directories>
+#    Copyright (C) 2007  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+DIFF_BIN=`which diff`
+FIND_BIN=`which find`
+OUTPUT="/tmp/diff_result.txt"
+
+
+clear
+first_dir="$1"
+second_dir="$2"
+
+echo "Searching files in $first_dir and compare with files in $second_dir"
+
+for i in `find "$first_dir" -print`
+do
+	if [ -f "$i" ]; then
+		md5sum "$i" >> "$OUTPUT-1.md5"
+		filename=`basename "$i"`
+		find "$second_dir" -name "$filename" -print -exec md5sum "{}" >> "$OUTPUT-2.md5" \;
+		find "$second_dir" -name "$filename" -print -exec diff "$i" "{}"  >> "$OUTPUT" \;
+	fi
+done
+
+rm -f "$OUTPUT-2.md5" "$OUTPUT-1.md5"
+
+cat $OUTPUT
+

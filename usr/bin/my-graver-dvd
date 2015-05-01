@@ -1,0 +1,84 @@
+#!/bin/sh
+#    <CDWriter shell program>
+#    <using mkisofs & cdrecord program >
+#
+#    Copyright (C) 2005  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+
+#
+# Varibale definition
+DVDWRITER="/dev/dvdrw"
+
+
+#
+# function to print usage for command
+function usage()
+{
+        echo "graver.sh command syntax...."
+	echo 
+        echo "Syntax :"
+        echo "   ./graver.sh volume_name directory_to_burn"
+        echo 
+	echo "  When only one argument is passed on command line, it have to be 'blank'"
+	echo "  to blank a CD"
+	echo
+        echo "Options :"
+        echo "   volume_name : CD volume name"
+        echo "   directory_to_burn : Directory to find all files to burn"
+	echo 
+}
+
+
+#
+# function to burn CD
+function burn ()
+{
+	growisofs -Z $DVDWRITER -V "$VOL" -R $DIR
+}
+
+
+
+#
+# Main program
+if test -z "$2"; then 	# Only one argument is passed on command line
+	if [ $1 = "blank" ]; then
+		dvdrecord -v -eject dev=ATAPI:$DVDWRITER -blank=fast	
+	else
+		usage
+	fi
+else			# Two args are passed on command line
+	if test -d "$2"; then	
+		VOL="$1"
+		DIR="$2"
+		burn
+	else
+		echo ""
+		echo "$2 is not a directory or you haven't any access to"
+		echo ""
+		usage
+	fi
+fi
+
+
+
+
+

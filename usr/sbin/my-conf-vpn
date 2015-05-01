@@ -1,0 +1,178 @@
+#!/bin/sh
+#
+#    <Script to configure OpenVPN>
+#    Copyright (C) 2007  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#
+# 	Version of this script : 0.1
+# 	CVS version : $id$
+
+AWK_BIN=`which awk`
+
+OPENVPN_CONF_FILE='my_openvpn.conf'
+DEFAULT_DIR='/etc/openvpn'
+CLIENT_TO_CLIENT=false
+out=false
+
+#
+# @brief Function to describe the command usage
+usage () {
+	echo "Usage of $0"
+	echo
+	echo -e "\t$0 [dir]  "
+	echo
+	echo -e "Options description :"
+	echo -e "\t[dir] This option is to set the openvpn configuration file destination"
+}
+
+#
+# Function to create configuration file for a VPN server
+server_config_file_creation () {
+	echo "Configuration file creation"
+	echo "# Server IP address on real network" >> $DEST_DIR
+	read -p "Adresse IP réelle du serveur : " local_ip
+	echo "local $local_ip" >> $DEST_DIR
+	echo >> $DEST_DIR
+	echo "#Protocol" >> $DEST_DIR
+	echo "proto udp" >> $DEST_DIR
+	echo >> $DEST_DIR
+	echo "# interface to use :" >> $DEST_DIR
+	echo "Interface à utiliser :"
+	echo -e "\ttun : pour un fonctionnement en mode routeur (routed)"
+	echo -e "\ttap : pour un fonctionement en mode pont (bridged)"
+	read -p "Interface : " interface
+	echo "dev $interface" >> $DEST_DIR
+	echo >> $DEST_DIR
+	echo "# Working mode" >> $DEST_DIR
+	echo "mode server" >> $DEST_DIR
+	echo >> $DEST_DIR
+	echo "# Support SSL/TLS" >> $DEST_DIR
+	echo "tls-server" >> $DEST_DIR
+	echo >> $DEST_DIR
+
+# -------------
+# DOCUMENTATION 
+# -------------
+#	Attention ici Syntaxe differente en fonction de l'interface tun ou tap...
+# Actuellement c'est pour une interface tap
+#
+#	if dev tun:
+#		ifconfig 10.8.0.1 10.8.0.2
+#		ifconfig-pool 10.8.0.4 10.8.0.251 # Allocation d'un pool d'adresses IP pour les clients 
+#		route 10.8.0.0 255.255.255.0
+#		if client-to-client:
+#			push "route 10.8.0.0 255.255.255.0"
+#		else
+#			push "route 10.8.0.1"
+#
+#	if dev tap:
+#		ifconfig 10.8.0.1 255.255.255.0
+#		ifconfig-pool 10.8.0.2 10.8.0.254 255.255.255.0
+#		push "route-gateway 10.8.0.1"
+#
+
+	echo "# Server IP address in VPN" >> $DEST_DIR
+	read -p "IP address in VPN : " ip_vpn
+	read -p "Netmask of VPN : " vpn_netmask
+	echo "ifconfig $ip_vpn $vpn_netmask" >> $DEST_DIR
+	# ICI calcule le réseau IP du VPN
+	addr_1=`echo $ip_vpn | awk -F . '{ print $1 }'`
+	addr_2=`echo $ip_vpn | awk -F . '{ print $2 }'`
+	addr_3=`echo $ip_vpn | awk -F . '{ print $3 }'`
+	addr_4=`echo $ip_vpn | awk -F . '{ print $4 }'`
+	mask_1=`echo $vpn_netmask | awk -F . '{ print $1 }'`
+	mask_2=`echo $vpn_netmask | awk -F . '{ print $2 }'`
+	mask_3=`echo $vpn_netmask | awk -F . '{ print $3 }'`
+	mask_4=`echo $vpn_netmask | awk -F . '{ print $4 }'`
+	net_1=`echo $(($addr_1&$mask_1))`
+	net_2=`echo $(($addr_2&$mask_2))`
+	net_3=`echo $(($addr_3&$mask_3))`
+	net_4=`echo $(($addr_4&$mask_4))`
+	ip_net=`echo "Network address : $net_1.$net_2.$net_3.$net_4"`
+	echo "Computed network address of VPN (): $ip_net"
+	if [ $interface = "tap" ]; then 										# Interface TAP (bridged VPN)
+		echo "push \"route-gateway $ip_vpn\"" >> $DEST_DIR
+	else																								# Interface TUN (routed VPN)
+		echo "Routed VPN need more configuration information"
+		if [ $CLIENT_TO_CLIENT = false ]; then
+			echo "push route $ip_vpn" >> $DEST_DIR
+		else
+			echo "push route $ip_net $vpn_netmask" >> $DEST_DIR
+		fi
+	fi
+	echo >> $DEST_DIR
+	echo "# Client configuration" >> $DEST_DIR
+	echo "client-config-dir cdd" >> $DEST_DIR
+	echo "cdd-exclusive" >> $DEST_DIR
+	echo >> $DEST_DIR
+
+# By default, this option is disabled
+# If you want to enable clients to clients communication, change the 
+#	$CLIENT_TO_CLIENT to true value
+	if [ $CLIENT_TO_CLIENT = true ]; then
+		echo "# Clients can see other clients" >> $DEST_DIR
+		echo "client-to-client" >> $DEST_DIR
+		echo >> $DEST_DIR
+	fi
+	echo >> $DEST_DIR
+
+# Ici il y a un point a vérifier avec le fichier de config SSL
+# le nom du fichier diffie hellman
+# le nom du fichier de l'autorité de certification
+	echo "# Diffie Hellman parameters" >> $DEST_DIR
+	echo "dh dh1024.pem" >> $DEST_DIR
+	echo >> $DEST_DIR
+	echo "# Information about certification authority" >> $DEST_DIR
+	echo "ca ca.cert" >> $DEST_DIR
+	echo "# Server certificat" >> $DEST_DIR
+	echo "cert server.pem" >> $DEST_DIR
+	echo >> $DEST_DIR
+	echo "# Session keys negociation time" >> $DEST_DIR
+	echo "reneg-sec 21600" >> $DEST_DIR
+	echo >> $DEST_DIR
+	echo "# Compress activation" >> $DEST_DIR
+	echo "comp-lzo" >> $DEST_DIR
+	echo >> $DEST_DIR
+	echo "# Verbose level" >> $DEST_DIR
+	echo "verb 2" >> $DEST_DIR
+}
+
+#
+# Main function
+clear
+echo "VPN configuration script"
+if [ $# -gt 0 ]; then 
+	if [ -d $1 ]; then
+		DEST_DIR="$1/$OPENVPN_CONF_FILE"
+	else
+#	echo -e "\"$1\" isn't a directory.\n OpenVPN configuration file will be set in default directory : $DEFAULT_DIR/$OPENVPN_CONF_FILE"
+		DEST_DIR="$DEFAULT_DIR/$OPENVPN_CONF_FILE"
+	fi
+	echo "Setting configuration in this path : $DEST_DIR"
+	server_config_file_creation
+	out=true
+else
+	echo "No arguments for command"
+	echo	
+	usage
+	out=false
+fi
+
+if [ "$out" = true ]; then		# final result
+	echo "Done !"
+else
+	echo "Error while setting the OpenVPN configuration file !"
+fi

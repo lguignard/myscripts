@@ -1,0 +1,7 @@
+myscript (0.2) upstream code; urgency=low
+	* Update the my-backup script to suite the packaging changes
+	* Update the my-halt script to suite my needs (halting my desktop and my
+			laptop with only one shell command, one password and SSH use.
+	
+ -- Laurent Guignard <lguignard2000@yahoo.fr>, September 2008
+

@@ -1,0 +1,213 @@
+#!/bin/sh
+#
+#    <Script to maintain a debian repository>
+#    Copyright (C) 2008  Laurent Guignard
+#
+#		Version 0.0.1 - Laurent Guignard - 2009/03/22
+# 	Version 0.0.2 - Laurent Guignard - 2009/03/26
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; version 2 of the License
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#   MA 02110-1301 USA
+#
+#		Authors :
+#			- Laurent Guignard<lguignard.debian@gmail.com>
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                                  
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+#
+#	TODO
+#		* Create a procedure to implement the Release file
+# 	* Create algorithm to copy repository with SSH command
+# 	* Create algorithm to copy repository with RSYNC command
+#		* Create algorithm to copy repository with FTP command
+#
+
+
+
+NEEDED_FILES="*.orig.tar.gz *.diff.gz *.dsc *.changes *.deb"
+
+
+
+usage() {
+	echo "Usage of $0"
+	echo
+	echo " [dir] [distrib] [section]"
+	echo "    * dir directory where all package files are located"
+	echo "    * distrib distribution name in which the package will be located (stable,testing,unstable,...)"
+	echo "    * section distribution section (main, non-free, contrib,...)"
+	echo
+	echo " If you want to use an SSH based deployment method, you have to configure you SSH client with"
+	echo " your ~/.ssh/config file. If this file isn't set, this script will fail."
+}
+
+
+
+
+# Function to create the local repository
+build_localrep() {
+	echo "Creating local repository"
+	mkdir -p "/tmp/dists/$1/$2/binary-i386"
+	mkdir -p "/tmp/dists/$1/$2/source"
+}
+
+
+# Function to clean /tmp directory
+clean_tmp() {
+	echo "Cleaning the local repository..."
+	rm -rf "/tmp/dists"
+}
+
+
+# Function to check directory hierarchy validity
+chk_dirval() {
+	out=0
+	for i in $NEEDED_FILES
+	do
+		nb_src=`find $1 -maxdepth 1 -name "$i" -print | wc -l`
+		test $nb_src = 0 &&break;
+	done
+	test $nb_src = 1&&out=1
+	return $out
+}
+
+
+# Upload file on remote server
+upload_repository() {
+	echo "Connection method : $CONNECT_METHOD !"
+	BIN_METHOD=`which $CONNECT_METHOD`
+	echo $BIN_METHOD
+	if test $BIN_METHOD -eq "" ; then
+		echo "Can't find command to suite the selected connection method !"
+		exit 1
+	else
+		case $CONNECT_METHOD in
+			ssh)
+				echo "Now uploading your repository with SCP"
+				if test $CLEAN_TARGET -eq "true" ; then
+					echo "Clean the target directory..."
+					ssh $REMOTEUSER@$REMOTESERVER rm -rf $REMOTEDIR/dist
+				fi
+				if test -f $HOME/.ssh/config ; then
+					scp -r /tmp/dist $REMOTEUSER@$REMOTESERVER:$REMOTEDIR
+				else
+					echo "No SSH config !"
+					exit 2
+				fi
+			;;
+			rsync)
+				echo "Now uploading your repository with RSYNC"
+				TMPFILE=`tempfile`
+				chmod 600 $TMPFILE
+				cat $REMOTEPASSWD > $TMPFILE
+				chmod 400 $TMPFILE
+				if test $CLEAN_TARGET -eq "false" ; then
+					rsync --password-file=$TMPFILE -arv /tmp/dist $REMOTEUSER@$REMOTESERVER:$REMOTEDIR
+				else
+					rsync --delete --password-file=$TMPFILE -arv /tmp/dist $REMOTEUSER@$REMOTESERVER:$REMOTEDIR
+				fi
+				chmod 600 $TMPFILE
+				rm -f $TMPFILE
+			;;
+			ftp)
+				echo "Now uploading your repository with FTP"
+				cd /tmp
+				ftp -nv $REMOTESERVER <<<FINFTP >/dev/null
+					user $REMOTEUSER
+					pwd $REMOTEPASSWD
+					cd $REMOTEDIR
+					rm -rf dist
+					mput -d dist
+					quit
+				FINFTP
+			;;
+			build)
+				# Here nothing to do, it's done by default
+			;;
+			*)
+				usage
+			;;
+		esac
+	fi
+}
+
+
+
+
+#
+# Main
+MYDEBREF_ENABLE="false"
+
+if test -f /etc/default/my-debref ;then
+	. /etc/default/my-debref
+	MYDEBREF_ENABLE="true"
+fi
+
+if test -f $HOME/.my-debref ;then
+	# Just take care about ACL of this file. Your login/password are stored in.
+	. $HOME/.my-debref
+	MYDEBREF_ENABLE="true"
+fi
+
+if test "$MYDEBREF_ENABLE" = "true"; then
+	# This configuration option isn't recommended
+	# identification parameters are available to all users
+	REMOTEUSER="remoteuser"
+	REMOTEPASSWD="remoteuser_passwd"
+	REMOTESERVER="remote.site"
+fi
+
+
+if test $# -lt 3 ; then
+	echo "Need more arguments..."
+	usage
+	exit 1
+else
+	if test ! -d "$1"; then
+		echo "First argument has to be directory repository !"
+		usage
+		exit 1
+	else
+		chk=`chk_dirval $1`
+		if test "$chk" = "0" 
+		then 
+			echo "Error, needed files are not in $1 !"
+			exit 1
+		else
+			echo "All needed files are set."
+		fi
+		build_localrep "$2" "$3"
+		# Here put files in the correct location instead of the ls command
+		cd "$1"
+		cp *.deb "/tmp/dists/$2/$3/binary-i386"
+		cp *.orig.tar.gz "/tmp/dists/$2/$3/source"
+		cp *.diff.gz "/tmp/dists/$2/$3/source"
+		cp *.dsc "/tmp/dists/$2/$3/source"
+		cp *.changes "/tmp/dists/$2/$3/source"
+		oldpwd=`pwd`
+		cd "/tmp/dists/$2/$3"
+		dpkg-scanpackages binary-i386 /dev/null dists/$2/$3/ | gzip -9c > binary-i386/Packages.gz
+		dpkg-scansources source /dev/null dists/$2/$3/ | gzip -9c > source/Sources.gz 
+		cd "$oldpwd"
+		# Here put FTP commands to upload the repository to destination
+		echo "Your repository is available in : /tmp/dists directory."
+		
+		if test "$CONNECT_METHOD" != "none"; then
+			clean_tmp
+			upload_repository
+		fi
+	fi
+fi
+
+exit 0

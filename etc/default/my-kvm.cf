@@ -1,0 +1,18 @@
+# This is the configuration file of the script my-kvm
+# 
+# This script intents to setup the default kvm configuration
+# with some parameters
+#
+# Author : Laurent Guignard <lguignard2000@yahoo.fr>
+# Copyright (C) 2008 Laurent Guignard
+#
+
+
+
+#
+# Virtual ethernet interface
+MY_TAP_NAME="tap10"
+
+#
+# Default hardware address of the virtual interface
+MY_HWADDR='00:00:10:52:37:48'

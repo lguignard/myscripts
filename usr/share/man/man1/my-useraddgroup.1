@@ -1,0 +1,23 @@
+.TH my-useraddgroup 1
+.SH NAME
+my-useraddgroup \- Tool to add user in a selected group
+.SH SYNOPSIS
+.B my-useraddgroup
+.RI account 
+.RI new group
+.br
+.SH DESCRIPTION
+This script adds the account parameter in the new group. This script has to be 
+run with root privileges.
+.PP
+This script use the basic UNIX commands : usermod and sed and isn't specific to 
+GNU/Linux or any specific distribution (Debian, RedHat,...)
+.B my-useraddgroup
+.SH SEE ALSO
+.BR usermod (1),
+.BR sed (1)
+.SH AUTHOR
+my-useraddgroup was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

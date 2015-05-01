@@ -1,0 +1,148 @@
+#!/bin/sh
+#
+#    <Script to sort photos according to their date>
+#    Copyright (C) 2009  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+#
+# 	Notes :
+# 	- returned string when running the 'exif' command: "No Exif data"
+#		- main thing to think about is : if a file isn't an image how has it 
+#     to be manage by script. The first answer is to move file in a 
+#     special directory (not_image/ directory)
+#
+# A faire
+#   - examen des arguments pour le choix des actions et le bon
+#     déroulement du script
+#   - renommer les fichiers
+
+
+#
+# \fn usage()
+# \brief Show a summary of command usage
+function usage() {
+	echo -e "$0 usage :"
+	echo -e "\t$0 command source [dest]"
+  echo -e
+	echo -e "\tsource : directory in which photo are stored"
+	echo -e "\tdest : directory in which photos have to be sorted"
+  echo
+  echo -e "\tDescription :"
+  echo -e "\tThis tools to sort photos of a directory"
+}
+
+
+#
+# \brief Needed tools are installed or not
+function areToolsHere() {
+	if test ! -x /usr/bin/exiv2; then
+		echo -n "/usr/bin/exiv2 is needed. Under Debian this software is provided"
+		echo " by 'exiv2' package."
+		exit 1
+	fi
+
+	if test ! -x /usr/bin/exif; then
+		echo -n "/usr/bin/exif is needed. Under Debian this software is provided"
+		echo " by 'exif' package."
+		exit -1
+	fi
+
+	if test ! -x /usr/bin/file; then
+		echo -n "/usr/bin/file is needed. Under Debian this software is provided"
+		echo " by 'file' package."
+		exit -1
+	fi
+}
+
+
+#
+# \brief Check if command line parameters are right
+# \param All command line arguments
+function checkParams() {
+  command=$1
+	source="$2"
+  if [ $3 ]; then
+  	dest="$3"
+  fi
+
+	for dir in "$source" "$dest"; do
+		if test ! -d "$dir"; then
+			echo "$dir has to be a directory !"
+			exit 1
+		fi
+	done
+}
+
+
+#
+# \brief print a new file name with creation date
+# \param $1 filename
+#
+function rename_file() {
+  file="$1"
+  exif_info=`/usr/bin/exif "$file" 2>/dev/null`
+  echo -n "$file - "
+  date=`echo "$exif_info" | grep "Date et heure" | grep -v '(' | awk '{ print $4 }' | awk -F '|' '{ print $2 }'`
+  annee=`echo $date | awk -F ':' '{ print $1 }'`
+  mois=`echo $date | awk -F ':' '{ print $2 }'`
+  jour=`echo $date | awk -F ':' '{ print $3 }'`
+
+  echo "$annee-$mois-$jour-$file"
+}
+
+
+#
+# \brief Move photos in a hierarchy tree based on date
+function move_photos() {
+  for file in "$1"/*; do
+    if test -f "$file"; then
+      filetype=`/usr/bin/file "$file" | grep image`
+      if test -n "$filetype"; then
+        exif_info=`/usr/bin/exif "$file" 2>/dev/null`
+        echo -n "$file - "
+        date=`echo "$exif_info" | grep "Date et heure" | grep -v '(' | awk '{ print $4 }' | awk -F '|' '{ print $2 }'`
+        annee=`echo $date | awk -F ':' '{ print $1 }'`
+        mois=`echo $date | awk -F ':' '{ print $2 }'`
+        jour=`echo $date | awk -F ':' '{ print $3 }'`
+#			echo "$jour / $mois / $annee"
+        mkdir -p "$2/$annee/$mois/$jour"
+        filename=`basename $file 2>/dev/null`
+        cp "$file" "$2/$annee/$mois/$jour/$filename"
+      else
+        mkdir -p "$2/not_image"
+        cp "$file" "$2/not_image/"
+      fi
+    fi
+  done
+}
+
+
+
+
+#
+# Main
+if [ "$#" -ne "2" ]; then
+	usage
+	exit 1
+fi
+areToolsHere
+
+checkParams $*
+
+exit 0

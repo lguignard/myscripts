@@ -1,0 +1,49 @@
+#!/bin/sh
+#
+#   <Script to replace a string by another string in all file of a directory and all subdirecties>
+#   Copyright (C) 2004  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+#
+# Command syntax
+#
+#    replace.sh  string_to_replace  string_replacing  directory_to_search  file_to_search
+#
+
+SED=/bin/sed
+
+clear
+
+STR2REPL=$1
+STR2SUB=$2
+DIR=$3
+FILE=$4
+
+echo "Replacing "$STR2REPL"string by "$STR2SUB" string in file "$FILE" in the directory "$DIR"."
+echo
+
+list=`find $DIR -name "$FILE" -print`
+
+for val in $list; do
+  tmp=$val".tmp"
+  echo $tmp
+  $SED -e s/$STR2REPL/$STR2SUB/g $val > $tmp
+  mv $tmp $val
+done
+

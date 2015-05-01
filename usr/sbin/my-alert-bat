@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+#    <Script to alert when low battery>
+#    Copyright (C) 2006  Laurent Guignard
+#		 Update 2008 Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+
+ACPI=`which acpi`
+XMESS=`which xmessage`
+HALT_BAT=1
+WARN_BAT=5
+MAX_BAT=100
+
+
+BAT=`$ACPI -b | grep Bat | awk '{ print $4 }' | awk -F% '{ print $1 }'`
+
+#if [[ $BAT -le $WARN_BAT ]]; then
+#	DISPLAY=:0.0 $XMESS -center "Seuil batterie inférieur à $ALERT_BAT : $BAT" &
+if [[ $BAT -eq $MAX_BAT ]]; then
+	export DISPLAY=locahost:0.0 
+	$XMESS -center "Seuil de charge maximal atteint $MAX_BAT%" &
+elif [[ $BAT -ge $HALT_BAT ]]; then
+	export DISPLAY=localhost:0.0 
+	$XMESS -center "Seuil batterie supérieur à $ALERT_BAT : $BAT - ARRET" &
+	/sbin/halt
+fi

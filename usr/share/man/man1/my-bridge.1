@@ -1,0 +1,31 @@
+.TH my-bridge 1
+.SH NAME
+my-bridge \- Setup and unset a bridge on the host
+.SH SYNOPSIS
+.B my-bridge
+	[ start|stop|restart|help ]
+.br
+.SH DESCRIPTION
+This script is used to setup and unset a virtual bridge on the local host with
+a virtual interface attached to this one.
+.BR
+The default configuration or each TAP interface, bridge and routing is hardly
+coded in script. This one can be tuned throw the 
+.I /etc/default/my-bridge.cf 
+file. All variables of the sample file are needed, do not remove even only one.
+This file has to be tuned to suite local host configuration.
+.BR
+.B start|stop
+command to set up (start) or unset (stop) the bridge.
+.B restart
+command to reset all existing virtual interfaces.
+.B help
+command to display my-bridge usage in line.
+.SH SEE ALSO
+.BR tunctl (1),
+.BR brctl (1)
+.SH AUTHOR
+my-bridge was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

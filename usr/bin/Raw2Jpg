@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+#    <Script to xxx >
+#    Copyright (C) 2010  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+
+EXT=NEF
+COUNT=`cat count`
+DIR=$1
+MARIAGE="/home/metro-gi/Mariage/$DIR"
+
+for i in $MARIAGE/*.JPG; do
+  if [ -n "$i" ]; then
+    name=`basename $i`
+    cp "$i" ./jpeg/$COUNT-$name
+    echo $i done; 
+    COUNT=$(($COUNT + 1))
+  fi
+done
+
+for i in $MARIAGE/*.$EXT; do
+  name=`basename $i $EXT`jpg
+#  dcraw -c -a -n 200 -h $i | ppmtojpeg > ./jpeg/$COUNT-$name; 
+  dcraw -c -a -n 200 $i | ppmtojpeg > ./jpeg/$COUNT-$name; 
+  echo $i done; 
+  COUNT=$(($COUNT + 1))
+done
+echo $COUNT > count

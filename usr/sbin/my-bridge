@@ -1,0 +1,196 @@
+#!/bin/sh
+#
+#    <Script to build a bridged configuration>
+#    Copyright (C) 2009  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+#    \version 
+#      - 0.1 Mar 2009, 3rd  - Laurent Guignard<lguignard.debian@gmail.com>
+#      - 0.2 Jun 2009, 10th - Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    \todo
+#		   - build a procedure to get all variables from a configuration file
+#      - 
+
+#
+# Initialization
+CONF_DEFAULT=/etc/default/my-bridge.cf
+
+if [ -f $CONF_DEFAULT ]; then
+	. $CONF_DEFAULT
+else
+	# List of all TAP interfaces
+	TAP_LIST="10 11 20 21"
+
+	# List of all bridges
+	BRDG_LIST="10"
+
+	NET_10="192.168.1.0"
+	MASK_10="255.255.255.0"
+
+	# List of TAP for each bridge
+	BRDG_10="10 11 20 21"
+
+	# Physical interface where physical network could be found
+	OUT_INT="eth2"
+	NET_GW="192.168.1.1"
+	FW_CMD="/etc/init.d/firewall.sh"
+fi
+
+
+function usage() {
+	CMD=`basename $0`
+	echo -e "$CMD usage :"
+	echo -e "  $CMD [start|stop|restart|help]"
+	echo 
+	echo -e "  start"
+	echo -e "    Set the network environment as configured in script variables"
+	echo -e "  stop"
+	echo -e "    Unset a previously configured environment. Caution, don't use"
+	echo -e "    if environment wasn't set with this script !"
+	echo -e "  restart"
+	echo -e "    Restart the script actions. Same as stop/start unit sequence"
+	echo -e "  help"
+	echo -e "    Display this short help"
+}
+
+#
+# Function to wipe all route from routing table
+function del_all_route() {
+	cpt=0
+	for i in `route -n | grep -v Destination | grep -v Table`; do
+		cpt=$(($cpt + 1))
+		DIV=$(($cpt % 9))
+		if test $DIV == 0; then
+			cpt=1
+		fi
+		if test $cpt == 1; then
+			CMD="route del -net $i"
+		fi
+		if test $cpt == 2; then 
+			CMD="$CMD gw $i"
+		fi
+		if test $cpt == 3; then 
+			CMD="$CMD netmask $i"
+		fi
+		if test $cpt == 8; then 
+			CMD="$CMD dev $i"
+#			echo $cpt - $i - $CMD
+			$CMD
+		fi
+	done
+}
+
+#
+# Backup all routes in a file
+function backup_routes () {
+	if test -f /var/tmp/mkbrdg.backup; then
+		cp /var/tmp/mkbrdg.backup /var/tmp/mkbrdg.backup.sav
+		chmod 700 /var/tmp/mkbrdg.backup
+	fi
+	route -n | grep -v Destination | grep -v Table > /var/tmp/mkbrdg.backup
+	chmod 400 /var/tmp/mkbrdg.backup
+}
+
+#
+# Restore routes from /var/tmp/mkbrdg.backup file
+function restore_routes () {
+	chmod 700 /var/tmp/mkbrdg.backup
+	BCK=/var/tmp/mkbrdg.backup
+	while read line; do
+		if test -n "$line"; then
+			net=`echo $line | cut -d' ' -f 1`
+			gateway=`echo $line | cut -d' ' -f 2`
+			mask=`echo $line | cut -d' ' -f 3`
+			dev=`echo $line | cut -d' ' -f 8`
+			if test "$net" != "0.0.0.0"; then
+				CMD="route add -net $net netmask $mask dev $dev"
+			else
+				CMD="route add default gw $gateway dev $dev"
+			fi
+			$CMD
+		fi
+	done < "$BCK"
+	rm -f $BCK
+}
+
+
+
+
+#
+# Main
+case "$1" in
+	start)
+		backup_routes
+		del_all_route
+		$FW_CMD stop
+		for i in ${BRDG_LIST}; do
+			brctl addbr br$i
+		done
+		for i in ${TAP_LIST}; do
+			tunctl -u metro-gi -t tap$i;
+			ifconfig tap$i up;
+		done
+		for b in ${BRDG_LIST}; do
+			BRIDGE="BRDG_""$b"
+			NET="NET_""$b"
+			MASK="MASK_""$b"
+			for i in ${!BRIDGE}; do
+				brctl addif br$b tap$i
+			done
+			brctl addif br$b $OUT_INT
+			ifconfig br$b up 
+			net=$NET
+			dev="br$b"
+			mask=$MASK
+			CMD="route add -net ${!net} netmask ${!mask} dev $dev"
+			$CMD
+		done
+	;;
+	stop)
+		for b in ${BRDG_LIST}; do
+			BRIDGE="BRDG_""$b"
+			NET="NET_""$b"
+			MASK="MASK_""$b"
+			for i in ${!BRIDGE}; do
+				 brctl delif br$b tap$i
+			done
+			 brctl delif br$b $OUT_INT
+			 ifconfig br$b down
+		done
+
+		for i in ${TAP_LIST}; do
+			 ifconfig tap$i down
+			 tunctl -d tap$i;
+		done
+		for i in ${BRDG_LIST}; do
+			 brctl delbr br$i
+		done
+		restore_routes
+		$FW_CMD start
+	;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+	;;
+	help)
+		usage
+	;;
+	*)
+		usage
+	;;
+esac

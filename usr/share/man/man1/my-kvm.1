@@ -1,0 +1,36 @@
+.TH my-kvm 1
+.SH NAME
+my-kvm \- script to boot a disk image
+.SH SYNOPSIS
+.B my-kvm
+.RI ACTION 
+.RI [DISK_IMAGE] 
+.RI [ISO_FILE]
+.br
+.SH DESCRIPTION
+This script script run into a Kernel Virtual Machine (KVM) the 
+disk image provided as argument 'disk_image'.
+.P
+.BR ACTION 
+This parameter has to be set. It can take following values :
+.P
+.BR run
+standard command to run the virtual machine without network support
+.P
+.BR net
+standard command to run the virtual machine with network support
+.SH OPTIONS
+raw hard image image for IDE hard disk 0
+DISK_IMAGE 
+ISO_FILE 
+.P
+.BR /etc/defaults/my-kvm.cf 
+is the configuration file of the script in which you can tune any 
+parameter of the kvm tools.
+.SH SEE ALSO
+.BR kvm (1)
+.SH AUTHOR
+my-kvm was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

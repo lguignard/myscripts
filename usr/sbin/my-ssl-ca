@@ -1,0 +1,123 @@
+#!/bin/sh
+#
+#    <Script to generate a new OpenSSL infrastructure>
+#    Copyright (C) 2007  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+
+#
+# Shell variables for commands
+OPENSSL_BIN=`which openssl`
+
+#
+# Shell variables for directories, path and file name
+OPENSSL_BASE='/etc/ssl'
+OPENSSL_CONF="$OPENSSL_BASE/openssl.cnf"
+OPENSSL_CONF_BAK="$OPENSSL_BASE/openssl.cnf.bak"
+OPENSSL_NEWCERTS_DIR="newcerts"
+
+#
+# Here is to change if we need to create CA as root
+#NEWOPENSSL_CONF="$OPENSSL_BASE/"
+NEWOPENSSL_CONF="./"
+
+#
+# Shell variables for configuration files
+CA_SECTION='[ ca ]'
+
+#
+# This function will build the configuration file for the CA 
+# and generate CA key, server key and Diffie Hellman parameters
+#
+#		@fn build_ca_config param
+# 	@param $1 Certificat Authority name
+#		@brief This function will build the configuration file for the CA  
+# 	and generate CA key, server key and Diffie Hellman parameters
+build_ca_config() {
+	echo "Building Certificat Authority configuration for $1 CA"
+	DIR="$1"
+	if [ ! -d "$DIR" ]; then
+		#
+		# Creating directories and associated openssl configuration file 
+		echo "Creating Certificat Authority directories."
+		mkdir "$DIR" "$DIR/private" "$DIR/certs" "$DIR/crl" "$DIR/$OPENSSL_NEWCERTS_DIR"
+		echo "Creating index file."
+		touch "$DIR/index.txt"
+		echo 01 > "$DIR/serial"
+		echo "All directories need for $1 are created."
+		touch "$DIR/private/.rand"
+
+		sed $OPENSSL_CONF -e "s/demoCA/$1/" | \
+		sed -e "s/cakey.pem/cakey_$1.key/" | \
+		sed -e "s/cacert.pem/ca_$1_cert.crt/" | \
+		sed -e "s/Country Name (2 letter code)/$country_code/" | \
+		sed -e "s/State or Province Name (full name)/$department/" | \
+		sed -e "s/Locality Name (eg, city)/$city/" | \
+		sed -e "s/Organization Name (eg, company)/$company/" | \
+		sed -e "s/Email Address/$email/" | \
+		sed -e "s/A challenge password/$password/" \
+		> $NEWOPENSSL_CONF
+		
+
+		echo "OpenSSL is configured with $1 as Certificat Authority with a server key."
+		#
+		# Creating all certificats
+		
+		# CA
+		$OPENSSL_BIN req -x509 -nodes -newkey rsa:1024 -extensions v3_ca -days 3650 -config "$NEWOPENSSL_CONF" -keyout "$DIR/private/cakey_$1.key" -out "$DIR/ca_$1_cert.crt" 
+
+		# Server key creation
+		$OPENSSL_BIN req -newkey rsa:1024 -notes -days 3650 -config "$NEWOPENSSL_CONF" -keyout "$DIR/private/server_$1.key" -out "$DIR/server_$1.req"
+		
+		# Server key signing with CA
+		$OPENSSL_BIN ca -days 3650 -cert "$DIR/ca_$1_cert.crt" -config "$NEWOPENSSL_CONF" -keyfile "$DIR/private/cakey_$1.key" -out "$DIR/server_$1.crt" -in "$DIR/server_$1.req"
+
+		# Parameter file Diffie Hellman
+		$OPENSSL_BIN dhparam -out "$DIR/dh1024.pem" 1024
+	else
+		echo "error during CA directory creation !"
+		exit 
+	fi
+}
+
+
+
+#
+# Main program
+clear
+echo "This script will configure a new Certificat Authority for OpenSSL"
+
+if [ ! "$1" ]; then
+	read -p "Nouvelle autorité de certification : " ca
+else
+	ca="$1"
+fi
+read -p "Which company is the certificate for : " company
+read -p "Which division/department is the certificate for : " department
+read -p "E-mail contact : " email
+read -p "Where is located the Certificate Authority : " city
+read -p "Which is the country of Certificate Authority : " country
+read -p "Which challenge password do you want : " password
+read -p "What is the country code (2 letter) : " country_code
+
+NEWOPENSSL_CONF=$NEWOPENSSL_CONF"openssl_$ca".cnf
+cat /dev/null > $NEWOPENSSL_CONF
+ca=`echo "$ca" | sed -e 's/ /_/'`
+ca_found=0
+ca_config_section=0
+
+build_ca_config $ca
+
+

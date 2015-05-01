@@ -1,0 +1,152 @@
+#!/usr/bin/perl
+#
+#    <Script to run a command on a remote host>
+#    Copyright (C) 2010  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+#use strict;
+use warnings;
+use Data::Dumper;
+
+my $HOST_LIST_FILE=$ENV{"HOME"}."/tmp/test_ip";
+my @HOST_LIST;
+my $MIN_ARGUMENT=0;  # Nombre d'argument moins 1 (1 argument valeur 0, 2 arguments valeur 1)
+#my $ssh_user=$ENV{"LOGNAME"};
+my $ssh_user="root";
+
+my $debug=0;
+
+#
+# Fonction décrivant l'usage de la commande
+sub usage {
+  my $cmd=$_[0];
+  $cmd=~s/(\/|\.)//g;
+  my $help="Description 
+  This script will run commands on a list of remote hosts.
+  All remote hosts have to to defined in the file $HOST_LIST_FILE.
+  All command to run with this script are in administration purpose,
+  so you need root access on remote hosts. All SSH server need to
+  allow root login with key to avoid password interaction for each 
+  host to connect. Moreover, no password has to be set for the root 
+  key to avoid passphrase asking from the SSH server.
+ 
+  $cmd usage
+  $cmd [user|group]
+     - user  : Add an Operating System user
+     - group : Add an Operating System group
+
+  $cmd details
+    -user
+      Synopsis : $cmd user username password
+        user     : command
+        username : login of the account to create
+        password : password (clear) of the account to create
+    - group
+      Synopsis : $cmd group groupname
+        group     : command
+        groupname : Name of the group tho create
+  \n";
+
+  print $help;
+}
+
+
+#
+# Read the IP addresses or hostnames in file
+# \return 0 OK
+#         1 File doesn't exist
+sub read_hosts {
+  if( -f $HOST_LIST_FILE) {
+    open(FILE,$HOST_LIST_FILE);
+    while(<FILE>) {
+      push @HOST_LIST,$_;
+    }
+    close FILE;
+  }
+  else {
+    print "Fichier inexistant !";
+    exit 1;
+  }
+}
+
+#
+# Function to run command or in debug case, just display the command
+sub run_command {
+  if($debug eq 1) {
+    print "\nCommandes passées\n\t$_[0]\n";
+  }
+  else {
+    open(CMD,"$_[0] |");
+    close CMD;
+  }
+}
+
+
+
+
+#
+# Function that will build and run the command asked on command line by the user
+sub switch_command {
+  my ($cmd,@other) = @_;
+  foreach my $host (@HOST_LIST) {
+    chomp $host;
+    if( "$cmd" eq "user" ) {
+      my ($username,$password,@notused) = @other;
+      $password=crypt("password", "$password");
+      $cmd="ssh $ssh_user\@$host useradd -m -U -p \"$password\" $username";
+    }
+    elsif ( "$cmd" eq "group" ) {
+      my ($groupname,@notused) = @other;
+      $cmd="ssh $ssh_user\@$host groupadd $groupname"
+    }
+    run_command($cmd);
+  }
+}
+
+
+
+#
+# Main function
+#
+# Check number of arguments on command line
+if($#ARGV < $MIN_ARGUMENT) {
+  print "Aucun argument fournit. Erreur !";
+  usage($0);
+  exit 1;
+}
+
+# Set the debug environment
+if( $ENV{"DEBUG"} ) {
+  $debug=1;
+}
+
+# Read and check host file
+read_hosts;
+if($#HOST_LIST < 0) {
+  print "Fichier vide";
+}
+else {
+  if($debug eq 1) {
+    print "Host qui seront traités :\n";
+    foreach my $i (@HOST_LIST) {
+      print $i;
+    }
+  }
+}
+
+switch_command(@ARGV);
+
+

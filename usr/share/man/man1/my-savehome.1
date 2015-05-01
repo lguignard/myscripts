@@ -1,0 +1,46 @@
+.TH my-savehome 1 
+.SH NAME
+my-savehome \- Save directories in user home directory 
+.SH SYNOPSIS
+.B my-savehome
+.br
+.SH DESCRIPTION
+This script save several directories in the home directory of the user.
+The only thing to do is to setup directories to save in home directory in 
+the file 
+.B /etc/default/my-savehome.cf.
+.PP
+To use this script, users have to apply an data storage policy fixed by 
+system administrator. Only data in directories fixed by system administrator
+in its hosts usage policies will be saved by the script.
+.PP
+If /etc/default/my-savehome.cf file is defined and filled 
+according to guidelines, everything is good
+I you want to use this script without the /etc/default/my-savehome
+file, you have to set environment variables used by this script.
+.PP
+.RS
+.B DEVICE 
+  DVD burning device (\/dev\/dvdrw,...)
+.P
+.B NB_DVD 
+  Number of DVD you want to save
+.P
+.B DATA1\.\.X 
+  String that contains files and directories names which are to backup
+.P
+.B DVD_BLANK 
+  true or false according to blanking or not the DVD before burning it
+.RE
+.PP
+Several tests are done, but anymore tests are needed to avoid BUGs in script.
+.B This man page has to be improved to describe more information.
+.SH SEE ALSO
+.BR my-backup (1),
+.BR dvd+rw-format (1),
+.BR growisofs (1)
+.SH AUTHOR
+my-savehome was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

@@ -1,0 +1,33 @@
+#
+# This file declare soma variables that are used in my-savehome script.
+# This file has to follow variable declaration rules of BASH scripts.
+#
+# \author Laurent Guignard<lguignard.debian@gmail.com>
+# \since 2009 February, 4
+#
+
+# DVD-RW device
+DEVICE="/dev/dvdrw"
+
+# Number of DVD for he entire backup
+NB_DVD=1
+
+# DVD blank is needed or not (true or false)
+DVD_BLANK=true
+
+# Values which contains data to be backup
+DATA1=".todo .mozilla .thunderbird .amsn .bash* .conkyrc .dupload.conf .fluxbox .gftp .gnupg .gq .ideskrc"
+DATA1="$DATA1 .irssi .ldap* .liferea  .openoffice.org2 .pgadmin3 .pgpass .profile .screenrc .Skype .ssh "
+DATA1="$DATA1 .stardict .subversion .thunderbird .tomboy .vim* .Xauthority"
+DATA1="$DATA1 .Xresources .xscreensaver .xsession"
+DATA1="$DATA1 seti xstart"
+
+DATA2="doc documents bin background images"
+
+DATA3="Mail2009"
+
+DATA4="photos"
+
+DATA5="temp"
+
+DATA6="pbuilder/home/metro-gi"

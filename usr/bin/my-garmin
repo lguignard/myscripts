@@ -1,0 +1,95 @@
+#!/bin/bash
+#
+#    <Script to get Garmin plugin>
+#    Copyright (C) 2012  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+
+
+SITE="http://ppa.launchpad.net/andreas-diesner/garminplugin/ubuntu/pool/main/g/garminplugin"
+DOWNLOADS="/home/metro-gi/Downloads/garmin"
+WGET=`which wget`
+DEBIAN_STABLE_COMPATIBLE="maverick"
+
+# Download function. Only download files to local directory
+download() {
+    cd $DOWNLOADS
+    $WGET -N -o $DOWNLOADS/wget.log -r -nd "$SITE"
+    echo "Garmin plugin package have been updated in $DOWNLOADS !"
+}
+
+# Select system architecture and install package. Generate a report !
+install_garmin() {
+  ARCHI=`uname -m`
+#  echo "Architecture : $ARCHI"
+  case "$ARCHI" in
+    i686)
+      echo "Your architecture ($ARCHI) is based on i386. This on will be selected !"
+      ARCHI="i386"
+    ;;
+    i386)
+      echo "i386 architecture detected !"
+    ;;
+    amd64)
+      echo "amd64 architecture detected !"
+    ;;
+    *)
+      echo "Architecture not detected !"
+      exit -1
+    ;;
+  esac
+  FILE=`ls $DOWNLOADS | grep $DEBIAN_STABLE_COMPATIBLE | grep $ARCHI`
+  echo "Installing file $DOWNLOADS/$FILE"
+  sudo dpkg -i "$DOWNLOADS/$FILE"
+  retval=$?
+  if [ "$retval" = 0 ]; then
+    echo "$DOWNLOADS/$FILE is installed !"
+  else
+    echo "Error during package install $DOWNLOADS/$FILE !"
+  fi
+}
+
+# Function 
+usage() {
+  echo "Usage $0 :"
+  echo -e "\t$0 options"
+  echo -e "\t-d : Download only"
+  echo -e "\t-i : Download and install package for system architecture"
+}
+
+
+if [ ! -d "$DOWNLOADS" ]; then
+  mkdir "$DOWNLOADS"
+fi
+
+
+case "$1" in
+  -d)
+    # Download only
+    download
+    ;;
+  -i)
+    # Download an install
+    download
+    install_garmin
+    ;;
+  *)
+    usage
+    ;;
+
+esac
+
+

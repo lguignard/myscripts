@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+#    <Script to convert ISO-8859-1 file into UTF8 file >
+#    Copyright (C) 2007 - Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+ICONV=`which iconv`
+ISO="-f ISO-8859-1"
+UTF="-t UTF-8"
+EXT_UTF="utf8_"
+
+usage() {
+	echo
+	echo "$0 usage : "
+	echo -e "\t$0 arg1"
+	echo 
+	echo "Parameters :"
+	echo -e "\targ1 : This argument is the directory where are files to convert	to UTF-8 format"
+	echo -e "\tAll files in this directory and all sub-directories will be	converted from ISO-8859-1 to UTF-8 encoding format"
+	echo
+	echo "All original files are saved in the original file directory as old_orginialfilename"
+	echo
+}
+
+convert_dir() {
+	DIR=$1
+	for file in $DIR/*; do
+		if test -f $file ; then
+			OLD=`dirname $file`/old_`basename $file`
+			DEST=`dirname $file`/$EXT_UTF`basename $file`
+			cp $file $OLD
+			$ICONV -f iso-8859-1 -t utf-8 $file -o $DEST
+			mv $DEST $file
+		fi
+	done
+}
+
+if [ ! $ICONV ]; then
+	echo "Utilitaire iconv non trouvé !!"
+	exit -1
+fi
+
+if [ $# != 1 ];then
+	echo "Need argument !!!!"
+	usage
+else
+	if ! test -d $1 ; then
+		echo "Argument has to be a directory !!"
+	else
+		convert_dir $1
+	fi
+fi
+

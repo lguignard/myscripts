@@ -1,0 +1,8 @@
+myscripts for Debian
+--------------------
+
+Package creation by Laurent Guignard <lguignard.debian@gmail.com>
+All scripts were done in a special directory hierarchy and they need to be
+modified to suite de Linux Filesystem Hierarchy in order to be Debian compliant.
+
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Wed, 27 Aug 2008 09:50:33 +0200

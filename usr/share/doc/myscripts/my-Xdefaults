@@ -1,0 +1,23 @@
+xterm*background: black
+xterm*foreground: white
+xterm*geometry: 100x30
+xterm*numlock: true
+xterm*scrollBar: false
+xterm*font: -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-15
+
+
+! GVim super couleurs.
+!Vim*useSchemes:         all
+!Vim*sgiMode:            true
+!Vim*useEnhancedFSB:     true
+!Vim.foreground:         Black
+!Vim.background:        lightyellow2
+!Vim*background:         white
+! N'utilisez PAS Vim*geometry, il coincerait les menu gvim,
+! utilisez Vim.geometry. Un astérisque entre Vim et geometry n'est pas autorisé.
+! Vim.geometry: widthxheight
+!Vim.geometry:           88x40
+!Vim*font:              -misc-fixed-medium-r-normal--20-200-75-75-c-100-iso8859-15-*5
+!Vim*font:             -b&h-lucida-bold-r-normal-sans-24-240-75-75-p-152-iso8859-15 
+!Vim*menuBackground: yellow
+!Vim*menuForeground: black

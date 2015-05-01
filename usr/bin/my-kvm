@@ -1,0 +1,113 @@
+#!/bin/sh
+#
+#   <Script to start a Kernel Virtual Machine>
+#   Copyright (C) 2008  Laurent Guignard
+#
+#		Version 0.0.1 - 2009/02/03 - Laurent Guignard
+#		Version 0.0.2 - 2009/04/01 - Laurent Guignard
+#   Version 0.0.3 - 2009/08/04 - Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; version 2 of the License
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#		Authors
+#			- Laurent Guignard<lguignard.debian@gmail.com>
+#			
+#		TODO
+#			- Create the procedure to establish the network infrastructure
+#			- Test the bridging system to enable network in virtual machine
+#			- Make unit test with the procedure of linuxmag n° (FR)
+#			 
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+
+KVM=`which kvm`
+
+
+function usage {
+	echo "Usage $0 ACTION [DISK_IMAGE] [ISO_FILE]"
+	echo 
+	echo "Standard options"
+	echo "ACTION"
+	echo -e "\tcreate : standard option to create the virtual machine."
+	echo -e "\t\tDISK_IMAGE and ISO_FILE parameters are needed here."
+	echo -e "\trun : standard option to run the virtual machine without network support"
+	echo -e "\tnet : standard option to run the virtual machine with network support"
+	echo "'DISK_IMAGE' is a raw hard image image for IDE hard disk 0 created with qemu-create command"
+	echo
+}
+
+
+
+
+#
+# Main program
+
+if test -f /etc/default/my-kvm.cf; then
+	. /etc/default/my-kvm.cf
+else
+	MY_TAP_NAME='tap10'
+	MY_HW_ADDR='00:00:10:52:37:48'
+fi
+
+if test "$KVM" -eq ""; then
+	echo "kvm is not found !"
+	exit 1
+fi
+
+
+#
+# Here check if all interfaces exist
+#
+# 
+#
+
+if test ! "$1"; then
+	usage $0
+else
+		case "$1" in
+			create)
+				if test -f "$2"; then 
+					DISK_IMAGE="$2"
+					if test -f "$3"; then
+						DISK_ISO="$3"
+					else
+						exit 1
+					fi
+				else
+					exit 1
+				fi
+
+				echo "Virtual machine creation "
+				 $KVM -hda "$DISK_IMAGE" -boot d -m 512 -k fr -cdrom "$DISK_ISO" \
+					 -noacpi -usb -usbdevice tablet -net nic,vlan=0,macaddr=$MY_HW_ADDR \
+					 -net tap,vlan=0,ifname=$MY_TAP_NAME,script=no -soundhw snd_hda_intel 
+				;;
+			run)
+				if test -f "$2"; then
+					echo "$KVM is running..."
+					$KVM -hda $2 -boot c -m 512 -k fr -full-screen -usb -usbdevice tablet 
+					echo "Thanks for using the $2 operating system image."
+				fi
+				;;
+			net)
+				echo "Virtual machine start with network support"
+				
+				;;
+		esac
+fi
+
+exit 0

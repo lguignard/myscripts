@@ -1,0 +1,32 @@
+.TH my-str2str 1 
+.SH NAME
+my-str2str \- replace a string by another in all file of a directory and 
+all sub-directies
+.SH SYNOPSIS
+.B str2str string1 string2 file directory
+.br
+.SH DESCRIPTION
+This script is used to replace a string (first parameter) by another (second parameter) in 
+all file (third parameter) in the directory (fourth parameter) and all its subdirectories.
+.PP
+.RS
+.B string1
+    string to search and replace
+.P
+.B string2
+    string that replace the search string
+.P
+.B file
+    extension or file name in which to search and replace the string
+.P
+.B directory
+    directory where to find file parameter
+.RE
+.SH SEE ALSO
+.BR sed (1)
+.br
+.SH AUTHOR
+my-str2str was written by Laurent Guignard <lguignard.debian@gmail.com>.
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

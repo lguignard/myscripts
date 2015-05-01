@@ -1,0 +1,142 @@
+#!/bin/sh
+#
+#   <Script to build an MPEG file with dvd-slideshow>
+#   Copyright (C) 2007 - 2009  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; version 2 of the License
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+#
+# @todo
+#
+#		* Check why dvd-slideshow doesn't work. Is it a bug of package or of 
+#     my script
+
+# DVD screen size 720x576
+
+DVDSLIDESHOW_CMD=`which dvd-slideshow`
+FILE_CMD=`which file`
+IDENTIFY_CMD=`which identify`
+AWK_CMD=`which awk`
+CONVERT_CMD=`which convert`
+PWD_CMD=`which pwd`
+
+SOURCE_DIR="$1"
+DURATION="$2"
+DESTINATION="$3"
+MAX_WIDTH=0
+MAX_HEIGHT=0
+DVD_X=720
+DVD_Y=576
+
+
+#
+# Script usage
+usage() {
+	clear
+	echo "Usage of $0"
+	echo 
+	echo -e "\t$0 arg1 arg2 arg3"
+	echo
+	echo -e "\targ1 : this is the directory where are all images to transform into mpeg file"
+	echo -e "\targ2 : this is the duration of each image in the mpeg file"
+	echo -e "\targ3 : this is the dvd-slideshow configuration file destination "
+	echo 
+}
+
+
+#
+# Function to check max width and max height of images in directory
+check_size() {
+	for mfile in $SOURCE_DIR/*; do
+		if [ -f $mfile ]; then
+			INFO_FILE=`$IDENTIFY_CMD $mfile`
+			echo "$INFO_FILE" | grep JPEG - 2>&1 1>&/dev/null
+			if [ $? -eq 0 ]; then
+				width=`echo "$INFO_FILE" | $AWK_CMD '{ print $3 }' | $AWK_CMD -Fx '{ print $1 }'`
+				height=`echo "$INFO_FILE" | $AWK_CMD '{ print $3 }' | $AWK_CMD -Fx '{ print $2 }'`
+				if [ $width -gt $MAX_WIDTH ]; then
+					export MAX_WIDTH=$width
+				fi
+				if [ $height -gt $MAX_HEIGHT ]; then
+					export MAX_HEIGHT=$height
+				fi
+			fi
+		fi
+	done
+	echo "Computed image size : $MAX_WIDTH x $MAX_HEIGHT"
+	
+}
+
+
+#
+# Function to convert images to correct format
+resize_directory() {
+		WIDTH=$(( $MAX_WIDTH * 576 / 720 ))
+		HEIGHT=$(( $MAX_HEIGHT * 720 / 576 ))
+	if [ $MAX_WIDTH -gt $MAX_HEIGHT ]; then
+		$CONVERT_CMD -resize "$MAX_WIDTH"x"$HEIGHT" xc:black -gravity center $1	-composite $1-mod.jpg
+	else
+		$CONVERT_CMD -resize "$WIDTH"x"$MAX_HEIGHT" xc:black -gravity center $1	-composite $1-mod.jpg
+	fi
+}
+
+
+#
+# Function to create black background in the new image
+create_black_image() {
+		WIDTH=$(( $MAX_WIDTH * 576 / 720 ))
+		HEIGHT=$(( $MAX_HEIGHT * 720 / 576 ))
+	if [ $MAX_WIDTH -gt $MAX_HEIGHT ]; then
+		$CONVERT_CMD -size "$MAX_WIDTH"x"$HEIGHT" xc:black /tmp/black_tmp.png
+	else
+		$CONVERT_CMD -size "$WIDTH"x"$MAX_HEIGHT" xc:black /tmp/black_tmp.png
+	fi
+}
+
+
+
+
+#
+#  Main function 
+if [ $# -lt 3 ];then
+	usage
+	exit
+fi
+
+echo "Checking images size..."
+check_size
+
+echo "Start resizing images..."
+for mfile in $SOURCE_DIR/*; do
+	if [ -f "$mfile" ]; then
+		resize_directory "$mfile"
+		tmpfile="$mfile"-mod.jpg
+		VAR=`basename "$tmpfile"`
+		LINE="$SOURCE_DIR/$VAR:$DURATION::scroll:right"
+		echo "$LINE" >> $DESTINATION
+		CURRENT_DIR=`$PWD_CMD`
+	fi
+done
+echo "Building slideshow..."
+
+#
+# Comment this command if you don't want any log displayed on console and 
+# uncomment command on the next line
+$DVDSLIDESHOW_CMD -n "Diaporama" -o "$HOME" -p -H -smp -f "$DESTINATION"
+
+#$DVDSLIDESHOW_CMD -n Diaporama -o "$CURRENT_DIR" -f "$DESTINATION" 2>&1 1>&/dev/null

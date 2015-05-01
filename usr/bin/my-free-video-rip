@@ -1,0 +1,104 @@
+#!/bin/sh
+#
+#    <Script to save video streaming with mencoder>
+#    Copyright (C) 2006 - 2009 Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+WGET_BIN=/usr/bin/wget
+MENCODER_BIN=/usr/bin/mencoder
+
+CHANNEL_LIST="http://mafreebox.freebox.fr/freeboxtv/playlist.m3u"
+PLAYLIST=playlist.m3u
+TMP_PLAYLIST=tmp_playlist.m3u
+
+
+#---------------------------------------------------
+# Command line syntax
+#---------------------------------------------------
+command_help ()
+{
+	echo "$0 syntax :"
+	echo ""
+	echo " Command line :"
+	echo "       $0 <channel> <file>"
+	echo ""
+	echo " Channel parameter : "
+	echo "       Channel have to be in this format :"
+	echo "          NRJ 12 channel : nrj12"
+	echo "          Direct 8 channel : direct8"
+	echo " "
+	echo "       All caracters have to be lowercase"
+	echo ""
+	echo " File parameter :"
+	echo "       File is the complete filename for destination recording file"
+	echo "       It's include complete path and filename"
+	echo ""
+	exit -1
+}
+
+
+
+
+
+#----------------------
+# Main
+#----------------------
+
+clear
+
+if test -z $1 ; then
+	command_help
+else
+	if [ $1 = "help" ]; then
+		command_help
+	fi
+	if test -z $2 ; then
+		command_help
+	else
+		if test -d ~/tmp ; then
+			cd ~/tmp
+			rm -f $TMP_PLAYLIST $PLAYLIST
+			$WGET_BIN $CHANNEL_LIST 2>&1 > /dev/null
+			cat $PLAYLIST | tr [:upper:] [:lower:] | tr -d [:blank:]  > $TMP_PLAYLIST
+		else
+			mkdir ~/tmp
+			cd ~/tmp
+			rm -f $TMP_PLAYLIST $PLAYLIST
+			$WGET_BIN $CHANNEL_LIST 2>&1 > /dev/null
+			cat $PLAYLIST | tr [:upper:] [:lower:] | tr -d [:blank:]  > $TMP_PLAYLIST
+		fi
+		if test -f $MENCODER_BIN ; then
+			cat $TMP_PLAYLIST | while true
+			do
+			        read ligne
+			        if [ "$ligne" = "" ]; then break; fi
+		        	echo $ligne | grep $1 2>&1 > /dev/null
+			        if [ $? -eq 0 ]; then
+			                read ligne
+					mencoder $ligne -oac lavc -ovc lavc -o $2 2> /dev/null
+					break;
+			        fi
+			done
+		else
+			echo "Mencoder is not installed on tjis computer..."
+		fi
+	fi
+fi

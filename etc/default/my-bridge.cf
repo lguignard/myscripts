@@ -1,0 +1,39 @@
+# This is the configuration file of the script my-bridge
+# 
+# This script intents to setup a network bridged configuration
+# with some special parameters set in this file
+#
+# Author : Laurent Guignard <lguignard.debian@gmail.com>
+# Copyright (C) 2008 Laurent Guignard
+#
+
+#
+# Bridge details
+MY_BRIDGE_NAME="br10"
+
+#
+# List of all TAP interfaces
+TAP_LIST="10 11 20 21"
+
+#
+# List of all bridges
+BRDG_LIST="10"
+
+#
+#
+NET_10="192.168.1.0"
+MASK_10="255.255.255.0"
+
+#
+# List of TAP for each bridge
+BRDG_10="10 11 20 21"
+
+#
+# Physical interface where physical network could be found
+OUT_INT="eth2"
+NET_GW="192.168.1.1"
+
+#
+# Command to stop firewall
+FW_CMD="/etc/init.d/firewall.sh"
+

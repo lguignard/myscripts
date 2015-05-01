@@ -1,0 +1,11 @@
+#!/bin/sh
+
+MAIL=lguignard2000@yahoo.fr
+MAILFROM=lguignard2000@yahoo.fr
+
+TITLE="Log report of `date`"
+
+DELAY=1d
+
+/usr/sbin/fwlogwatch -d -s -v -y -t -N -F $MAILFROM -T $MAIL -a 5
+ 

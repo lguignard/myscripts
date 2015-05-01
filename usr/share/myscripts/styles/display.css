@@ -1,0 +1,12 @@
+.data {
+	margin-left: auto;
+	margin-right: auto;
+	width: 50%;
+}
+
+.data ul,li {
+	text-align: left;
+	text-decoration: none;
+	list-style-type: none;
+	padding-left: 0;
+}

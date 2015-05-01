@@ -1,0 +1,124 @@
+#!/bin/sh
+#
+#    <Script to convert MP3 files in WAV files>
+#    Copyright (C) 2002 - Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+
+
+TMP_MP3=/tmp/mp3_tmp.txt
+TARGET=/mnt/win_d/
+
+
+#---------------------------------------------------
+# Command line syntax
+#---------------------------------------------------
+command_help ()
+{
+	echo "mp32wav syntax :"
+	echo ""
+	echo " Command line :"
+	echo "       mp32wav <dir> <file>"
+	echo ""
+	echo " SPECIACATIONS :"
+	echo "   File name to convert hasn't to contain any space caracter."
+	echo "   If file name coontains any space caracter, script fails"
+	echo "   I think about this problem and in futur version it wiil be "
+	echo "   possible to have space caracters in the file name."
+	exit -1
+}
+
+
+
+#---------------------------------------------------
+# Convert the MP3 file
+#---------------------------------------------------
+convert_file ()
+{
+echo "Converting $FILE (MP3 file) into WAV format ..."
+echo "File Name : "$FILE
+OLDNAME=`echo $FILE | awk -F. '{ print $1 }'`
+NEWNAME=`echo $OLDNAME | sed 's/ /_/g'`
+NEWNAME=$NEWNAME.mp3
+/bin/mv -v "${FILE}" "${NEWNAME}"
+mpg123 -b 10000 -s $FILE | sox -t raw -r 44100 -s -w -c2 - $FILE.wav
+}
+
+
+#---------------------------------------------------
+# Fonction to remove spaces from a file name
+#---------------------------------------------------
+removespaces()
+{
+echo "remove space caracters from file name ..."
+for FILE in "${DIR}"/* ;
+do
+	OLDNAME=`echo $FILE | awk -F. '{ print $1 }'`
+	NEWNAME=`echo $OLDNAME | sed 's/ /_/g'`
+	NEWNAME=$NEWNAME.mp3
+	/bin/mv -v "${FILE}" "${NEWNAME}"
+done
+}
+
+
+#---------------------------------------------------
+# Convert all MP3 file in the directory
+#---------------------------------------------------
+convert_dir ()
+{
+echo "Converting the directory ..."
+echo "Directory name : "$DIR
+removespaces
+for MFILE in "${DIR}"/*.mp3 ;
+do
+FILE=$MFILE
+convert_file
+#rm -f $MFILE
+done
+}
+
+
+
+
+#----------------------
+# Main
+#----------------------
+
+
+clear
+
+if test -z $1 ; then
+	command_help
+else
+	if test -d $1 ; then
+		echo $1" is a directory"
+		DIR=$1
+		convert_dir
+	else
+		if test -f $1 ; then
+			echo $1"is a file"
+			FILE=$1
+			convert_file
+		else
+			echo "Unknown type of argument ..."
+			exit -1;
+		fi
+	fi
+	echo "Doing the job ..."
+fi

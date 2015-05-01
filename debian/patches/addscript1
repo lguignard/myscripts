@@ -1,0 +1,197 @@
+Description: <short summary of the patch>
+ TODO: Put a short summary on the line above and replace this paragraph
+ with a longer explanation of this change. Complete the meta-information
+ with other relevant fields (see below for details). To make it easier, the
+ information below has been extracted from the changelog. Adjust it or drop
+ it.
+ .
+ myscripts (0.3.1-1) unstable; urgency=low
+ .
+   * Switch to dpkg-source 3.0 (quilt) format,
+   * Add my-fit2gpx and my-garminmapdownload scripts,
+   * Add missing manpages,
+   * Add my-photo-sign script
+Author: Laurent Guignard <lguignard.debian@gmail.com>
+
+---
+The information above should follow the Patch Tagging Guidelines, please
+checkout http://dep.debian.net/deps/dep3/ to learn about the format. Here
+are templates for supplementary fields that you might want to add:
+
+Origin: <vendor|upstream|other>, <url of original patch>
+Bug: <url in upstream bugtracker>
+Bug-Debian: http://bugs.debian.org/<bugnumber>
+Bug-Ubuntu: https://launchpad.net/bugs/<bugnumber>
+Forwarded: <no|not-needed|url proving that it has been forwarded>
+Reviewed-By: <name and email of someone who approved the patch>
+Last-Update: <YYYY-MM-DD>
+
+--- /dev/null
++++ myscripts-0.3.1/usr/bin/my-photo-sign
+@@ -0,0 +1,42 @@
++#!/bin/sh
++#
++#    <Script to add signature to image>
++#    Copyright (C) 2014  Laurent Guignard<lguignard.debian@gmail.com>
++#
++#    This program is free software; you can redistribute it and/or modify
++#    it under the terms of the GNU General Public License as published by
++#    the Free Software Foundation; version 2 of the License
++#
++#    This program is distributed in the hope that it will be useful,
++#    but WITHOUT ANY WARRANTY; without even the implied warranty of
++#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++#    GNU General Public License for more details.
++#
++#    You should have received a copy of the GNU General Public License
++#    along with this program; if not, write to the Free Software
++#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
++#    MA 02110-1301 USA
++#
++
++#!/bin/sh
++IMAGE=$1
++CAPTION="Photos by Laurent Guignard - http://velo.famille-guignard.org"
++#FONT="/usr/share/myscripts/FLAMER.TTF"
++FONT="/usr/share/fonts/truetype/freefont/FreeSans.ttf"
++BORDERWIDTH="6"
++BORDERWIDTH2="1"
++
++width=`identify -format "%w" $IMAGE`
++heigth=`identify -format "%h" $IMAGE`
++
++convert -size 40x${width} gradient:none-white -rotate -90 +repage gradient.png
++
++convert -size ${width}x40 -background none -fill white -font $FONT -gravity East label:"`echo $CAPTION`" text_mask.png
++
++convert gradient.png text_mask.png -alpha set -compose Dst_Out -composite gradient.png
++
++composite -gravity South gradient.png $IMAGE copy-$IMAGE
++rm gradient.png text_mask.png
++
++mogrify -bordercolor white -border "${BORDERWIDTH}x${BORDERWIDTH}" copy-$IMAGE
++mogrify -bordercolor black -border "${BORDERWIDTH2}x${BORDERWIDTH2}" copy-$IMAGE
+--- /dev/null
++++ myscripts-0.3.1/usr/share/man/man1/my-photo-sign
+@@ -0,0 +1,19 @@
++.TH my-photo-sign 1 
++.SH NAME
++my-photo-sign \- script to add signature to image
++.SH SYNOPSIS
++.B my-photo-sign filename
++.SH DESCRIPTION
++This script is used to add signature to image
++.PP
++.B filename
++The only argument is the file name of the image to add signature.
++.PP
++.SH SEE ALSO
++.BR imagemagick (1),
++.BR convert (1)
++.SH AUTHOR
++my-photo-sign was written by Laurent Guignard <lguignard.debian@gmail.com>.
++.PP
++This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
++for the Debian project (but may be used by others).
+--- myscripts-0.3.1.orig/usr/share/man/man1/my-checklogs.1
++++ myscripts-0.3.1/usr/share/man/man1/my-checklogs.1
+@@ -1,8 +1,8 @@
+-.TH my-checklog 1 
++.TH my-checklogs 1 
+ .SH NAME
+ my-checklogs \- script to ...
+ .SH SYNOPSIS
+-.B my-checklog
++.B my-checklogs
+ [username]
+ .SH DESCRIPTION
+ This script is used to ...
+@@ -18,7 +18,7 @@ This script is used to ...
+ .SH SEE ALSO
+ .BR ssh (1),
+ .SH AUTHOR
+-my-checklog was written by Laurent Guignard <lguignard.debian@gmail.com>.
++my-checklogs was written by Laurent Guignard <lguignard.debian@gmail.com>.
+ .PP
+ This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+ for the Debian project (but may be used by others).
+--- myscripts-0.3.1.orig/usr/share/man/man1/my-conf-vpn.1
++++ myscripts-0.3.1/usr/share/man/man1/my-conf-vpn.1
+@@ -3,14 +3,14 @@
+ my-conf-vpn \- Configure OpenVPN
+ .SH SYNOPSIS
+ .B my-conf-vpn
+-" directory"
++"directory"
+ .br
+ .SH DESCRIPTION
+ This script is used to create an OpenVPN configuration file. All needed
+-informations are asked to operator.
++information are asked to user.
+ .BR
+ .B directory 
+-Set the Openvpn configuration file destination
++Set the OpenVPN configuration file destination
+ .SH SEE ALSO
+ .BR openssl (1),
+ .BR openvpn (1)
+--- myscripts-0.3.1.orig/usr/share/man/man1/my-savehome.1
++++ myscripts-0.3.1/usr/share/man/man1/my-savehome.1
+@@ -34,7 +34,7 @@ file, you have to set environment variab
+ .RE
+ .PP
+ Several tests are done, but anymore tests are needed to avoid BUGs in script.
+-.B This man page has to be improved to describe more informations.
++.B This man page has to be improved to describe more information.
+ .SH SEE ALSO
+ .BR my-backup (1),
+ .BR dvd+rw-format (1),
+--- /dev/null
++++ myscripts-0.3.1/usr/share/man/man1/Raw2Jpg.1
+@@ -0,0 +1,24 @@
++.TH Raw2Jpg 1 
++.SH NAME
++Raw2Jpg \- script to ...
++.SH SYNOPSIS
++.B Raw2Jpg
++...
++.SH DESCRIPTION
++This script is used to ...
++.PP
++.B ...
++...
++.PP
++.B ...
++.PP
++.B ...
++...
++.PP
++.SH SEE ALSO
++.BR ssh (1),
++.SH AUTHOR
++my-md5 was written by Laurent Guignard <lguignard.debian@gmail.com>.
++.PP
++This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
++for the Debian project (but may be used by others).
+--- myscripts-0.3.1.orig/usr/share/man/man1/my-md5.1
++++ myscripts-0.3.1/usr/share/man/man1/my-md5.1
+@@ -3,7 +3,7 @@
+ my-md5 \- script to ...
+ .SH SYNOPSIS
+ .B my-md5
+-[username]
++...
+ .SH DESCRIPTION
+ This script is used to ...
+ .PP
+--- myscripts-0.3.1.orig/usr/share/man/man1/my-garmin.1
++++ myscripts-0.3.1/usr/share/man/man1/my-garmin.1
+@@ -3,7 +3,7 @@
+ my-garmin \- script to ...
+ .SH SYNOPSIS
+ .B my-garmin
+-[username]
++..
+ .SH DESCRIPTION
+ This script is used to ...
+ .PP

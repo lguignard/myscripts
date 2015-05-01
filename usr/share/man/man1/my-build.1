@@ -1,0 +1,27 @@
+.TH my-build 1 
+.SH NAME
+my-build \- script to build debian packages from source
+.SH SYNOPSIS
+.B my-build
+[ package_name ]
+.BR
+.SH DESCRIPTION
+This script has been done to run all needed commands to build a Debian 
+package and all needed tests on and display report.
+.PP
+.BR package_name
+If this argument is specified, it has to follow Debian 
+upstream package naming rules. For example, 
+.BI dhcp-probe-1.2.2
+that is composed of the package name and the upstream version. 
+.PP
+This argument is optional but it is recommended to used instead of you 
+exactly know what you want to do.
+.SH SEE ALSO
+.BR dpkg-buidpackage (1),
+.BR lintian (1)
+.SH AUTHOR
+my-build was written by Laurent Guignard <lguignard.debian@gmail.com>
+.PP
+This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+for the Debian project (but may be used by others).

@@ -1,0 +1,2 @@
+#!/bin/sh
+sudo gphotofs /media/mtp -o allow_other

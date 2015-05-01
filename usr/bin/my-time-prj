@@ -1,0 +1,221 @@
+#!/bin/sh
+#
+#   <Script to register time spent on a projet>
+#   Copyright (C) 2007  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; version 2 of the License
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#
+#   August 2009 , 4th - Laurent Guignard<lguignard.debian@gmail.com>                                              
+#     - Change shell executed by default from Bash to sh to suite Debian 
+#       politic about shell change to Dash
+#
+#
+# This script can give you some statistics about your work on your projects
+# I took the wmwork as model for this script, but everybody doesn't have
+# an X11 interface to run it and I spent time on a script to register time 
+# spent on a project and generate log of each working session.
+# I hope it will be usefull and any report about your script usage will 
+# be a pleasure to me. If you need a modification, just mail me with your 
+# wish list and, may be if I have time, I'll do it ;)
+#
+#
+# This script has been realesed Wed 08 August 2007 by Laurent Guignard
+# Report all bugs to metro-gi@users.sourceforge.net
+#
+
+# This file must be here to run this script !!!
+. /etc/default/my-yes_no.sh
+
+#DATA_DIR="$HOME/.time_prj"
+DATA_DIR="$HOME/.wmwork"
+DATE_CMD=`which date`
+PRINTF=`which printf`
+
+
+
+
+#
+# Function to print help
+help() {
+	echo "$0 command line :"
+	echo 
+	echo "This utility is design to register time spent on a projet."
+	echo "You only need to run it and time is automatically added to spent time on project."
+	echo 
+	echo "Usage : "
+	echo
+	echo "$0 project_name [start|pause|clear]"
+}
+
+
+
+#
+# Function to create directory tree in home directory
+create_dirtree() {
+	if [ ! -d $DATA_DIR ]; then
+		read -p  "Data directory doesn't exist. Do you want to create it or exit (Y/N) : " answer
+		test_yes_no $answer
+		if [ $answer == "y" ]; then
+			mkdir $DATA_DIR
+		fi
+	fi
+}
+
+
+#
+# Function that start the time count
+start_timecount() {
+	create_dirtree		# Directory tree creation
+
+	# Déterminer l'algorithme de décompte du temps
+	START_TIME=`$DATE_CMD "+%s"`
+	START_DATE=`$DATE_CMD -R`
+	echo $START_TIME > "/tmp/.$1_start_time"
+	echo "$START_DATE" >> "$DATA_DIR/$1"
+}
+
+
+
+#
+# Function to compute time provide in secondes into hour/minutes/second format
+#
+# 	$1 This argument represent the time in secondes
+compute_time() {
+	working_time=$1
+	secondes=`expr $1 % 60`
+	minutes=`expr $1 / 60`
+	working_time=$(($1-$(($(($minutes*60))-$secondes))))
+	hours=$(($working_time/24))
+
+#	echo "$minutes m"
+#	echo "$secondes s"
+#	echo "$hours h"
+#	echo "$hours:$minutes:$secondes"
+
+	$PRINTF %.3d:%.2d:%.2d $hours $minutes $secondes
+}
+
+
+
+#
+# Function to update the working time of a project
+#
+#		$1 Script name parameter
+# 	$2 Time elapsed on project
+update_project_elapsed_time() {
+	upper_script=`echo $1 | tr [:lower:] [:upper:]`
+	cur_time=$2
+	if [ -f "$DATA_DIR/$1"_time_prj_count ]; then
+		reg_time=`cat "$DATA_DIR/$1"_time_prj_count | awk -F: '{ print $2 }'`
+		new_total_project_time=$(($cur_time+$reg_time))
+		echo $upper_script:$new_total_project_time: > "$DATA_DIR/$1"_time_prj_count
+	fi
+}
+
+
+
+#
+# Function that stop time count
+stop_timecount() {
+	# Mettre a jour les fichiers de décompte du temp
+	STOP_TIME=`$DATE_CMD "+%s"`
+	STOP_DATE=`$DATE_CMD -R`
+	START_TIME=`cat "/tmp/.$1_start_time"`
+	WORKING_TIME=$(($STOP_TIME-$START_TIME))
+#	echo "$1 start at $START_TIME"
+#	echo "$1 stop at $STOP_TIME"
+#	echo "Temps écoulé pour $1 : $WORKING_TIME secondes"
+
+	elapsed_time=`compute_time $WORKING_TIME`
+	upper_script=`echo $1 | tr [:lower:] [:upper:]`
+	rm "/tmp/.$1_start_time"
+	if test -f "$DATA_DIR/$1_time_prj_count"
+	then 
+		# File exists, so need to take old values to check the total time spent on project
+		update_project_elapsed_time $1 $(($STOP_TIME-$START_TIME))
+		if [ -f "$DATA_DIR/worklog" ]; then
+			rm -f "$DATA_DIR/worklog"
+		fi
+		echo "# wmwork configuration file" >> "$DATA_DIR/worklog"
+		echo "# do not edit while wmwork is running" >> "$DATA_DIR/worklog"
+		for file in "$DATA_DIR/*_time_prj_count"; do
+			if [ $file != "worklog" ]; then
+				cat $file >> "$DATA_DIR/worklog"
+			fi
+		done
+	else
+	 	# File doesn't exist, have to create it !!!
+	 	echo "$upper_script:$WORKING_TIME:" > "$DATA_DIR/$1_time_prj_count"
+	fi
+	if [ -f "$DATA_DIR/$1" ]; then
+		cat "$DATA_DIR/$1" | 	while true
+		do
+			read line
+			if [ "$line" = "" ]; then break; fi
+		done
+#		echo $line
+		oldline=$line
+		if [ -f "/tmp/tmp_$1_log.txt" ]; then
+			rm "/tmp/tmp_$1_log.txt"
+		fi
+		cat "$DATA_DIR/$1" | 	while true
+		do
+			read line
+			if [ "$line" = "" ]; then break; fi
+			if [ "$line"=="$oldline" ]; then
+				echo "$line $elapsed_time" >> "/tmp/tmp_$1_log.txt"
+			else
+				echo "$line" >> "/tmp/tmp_$1_log.txt"
+			fi
+			mv "/tmp/tmp_$1_log.txt" "$DATA_DIR/$1"
+		done
+	fi
+}
+
+
+
+
+#
+# Main 
+clear
+
+if [ $# -ne 2 ]; then
+	help
+	exit -1
+fi
+
+case "$2" in 
+	start)
+		start_timecount "$1"
+	;;
+	stop)
+		stop_timecount "$1"
+	;;
+	default)
+		help
+		exit -1
+	;;
+esac
+
+
+
+
+
+
+
+
+
+
+

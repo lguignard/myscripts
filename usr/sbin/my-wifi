@@ -1,0 +1,143 @@
+#!/bin/sh
+#
+#    <Script to configure WIFI network and store configuration>
+#    Copyright (C) 2008  Laurent Guignard
+#
+#   This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+
+IFACE=eth2
+IWLIST=`which iwlist`
+IWCONFIG=`which iwconfig`
+DHCLIENT=`which dhclient`
+
+
+#
+# Fonction realisant la configuraion du WIFI
+# @param $1 ESSID du réseau
+# @param $2 Clé WEP du réseau
+do_config() {
+	echo "Configuring network $1 ..."
+	$IWCONFIG $IFACE essid $1 2>1 1>/dev/null
+	$IWCONFIG $IFACE key $2 2>1 1>/dev/null
+	$DHCLIENT $IFACE 2>1 1>/dev/null
+	if [ $? -eq 0 ]; then
+		echo "Configuration correctement terminée "
+	else
+		echo "Echec de la configuration !!"
+	fi
+}
+
+
+
+
+
+
+#
+# Fonction réalisant le menu en fonction des réseaux contenu 
+# dans un fichier de configuration
+make_menu() {
+	read -p "Nom du fichier contenant les configurations réseau : " net_file
+	cpt=0
+	cpt2=0
+	if [ -f $net_file ]; then
+		while read line
+			do
+				net_name=`echo $line | awk -F';' '{print $1}'`
+				cpt=`expr $cpt + 1`
+				echo -e "\t$cpt - $net_name"
+			done < "$net_file"
+		read -p "Sélectionnez un réseau : " reseau
+
+		while read line
+			do
+				net_name=`echo $line | awk -F';' '{print $1}'`
+				net_key=`echo $line | awk -F';' '{print $2}'`
+				cpt2=`expr $cpt2 + 1`
+				if [ $cpt2 -eq $cpt ]; then
+					do_config $net_name $net_key
+				fi
+			done < "$net_file"
+
+	fi
+}
+
+
+
+
+
+#
+# Fonction permettant de sauvegarder la configuration réseau
+# @param $1 ESSID du réseau
+# @param $2 Clé WEP du réseau
+sauve_config() {
+	read -p "Nom du fichier de sauvegarde : " save_file
+	echo -n "Sauvegarde dans le fichier $save_file ..."
+	echo "$1;$2" >> $save_file
+	if [ $? -eq 0 ]; then
+		echo "\t-  [ OK ]"
+	else
+		echo "\t- [ FAIL ]"
+	fi
+}
+
+
+
+#
+# Main program
+
+clear
+
+read -p "Configurer le réseau en fonction d'un fichier de configuration (O/N)" config
+
+if [ $config = 'n' ] || [ $config = 'N' ]; then
+	ESSID=`$IWLIST $IFACE scanning | grep ESSID | awk -F: '{print $2}' | awk -F\" '{print $2}'`
+	cpt=0
+	echo "Sélectionnez le réseau auquel se connecter : "
+	for i in $ESSID; do
+		cpt=`expr $cpt + 1`
+		echo -e "\t$cpt - $ESSID"
+	done
+	echo -e "\tq - Quit"
+
+	read -p "Choix : " choix
+
+	if [ $choix = 'q' ] || [ $choix = 'Q' ]; then
+		exit 1
+	fi
+
+	cpt=0
+	for i in $ESSID; do
+		cpt=`expr $cpt + 1`
+		if [ $cpt -eq $choix ]; then
+			net_essid=$ESSID
+		fi
+	done
+	read -p "Clé WEP du réseau : " wep_key
+
+	read -p "Sauvegarder des paramètres (O/N) ? " save
+
+	if [ $save = 'o' ] || [ $save = 'O' ]; then
+		sauve_config $net_essid $wep_key
+	fi
+
+	read -p "Mettre en place la configuration (O/N) ? " configure
+	if [ $configure = 'o' ] || [ $configure = 'O' ]; then
+		do_config $net_essid $wep_key
+	fi
+else
+	make_menu
+fi
+
+

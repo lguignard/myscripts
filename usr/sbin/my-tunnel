@@ -1,0 +1,5 @@
+#!/bin/sh
+
+HTC=`which htc`
+
+$HTC -F 300 -P 192.100.50.254:8080 www-metro.dyndns.org:300
