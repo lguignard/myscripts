@@ -44,7 +44,7 @@ else
 fi
 
 sudo mount --bind /dev $CHROOT_TARGET/dev
-sudo mount --bind /dev/pts $CHROOT_TARGET/dev
+sudo mount --bind /dev/pts $CHROOT_TARGET/dev/pts
 sudo mount --bind /proc $CHROOT_TARGET/proc
 sudo mount --bind /sys $CHROOT_TARGET/sys
 sudo mount --bind /tmp $CHROOT_TARGET/tmp
