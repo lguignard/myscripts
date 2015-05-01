@@ -3,7 +3,7 @@ myscripts (0.4.2-1) UNRELEASED; urgency=low
   * Update my-photo-sign script to add border to image,
   * Update go-chroot to mount /dev/pts with bind options.
 
- -- Laurent Guignard <lguignard2000@gmail.com>  Fri, 01 May 2015 12:03:06 +0200
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Fri, 01 May 2015 12:03:06 +0200
 
 myscripts (0.4.1-1) unstable; urgency=low
 
