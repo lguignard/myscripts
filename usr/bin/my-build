@@ -72,7 +72,7 @@ fi
 
 cd "$DESTPKG"
 
-DPKG_BLDPKG_OPTS="-d -tc $MORE_DPKG_OPT --force-sign"
+DPKG_BLDPKG_OPTS="-tc $MORE_DPKG_OPT"
 dpkg-buildpackage -rfakeroot $DPKG_BLDPKG_OPTS
 if [ "$FASTER" = "false" ]; then
 	dpkg-buildpackage -rfakeroot -sa $DPKG_BLDPKG_OPTS
