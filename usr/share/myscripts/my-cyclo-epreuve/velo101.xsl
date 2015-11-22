@@ -23,16 +23,18 @@
 
 
 <xsl:template match="li">
-  <xsl:apply-templates select="span" />
-  <xsl:text>
-  </xsl:text>
+	<xsl:if test="normalize-space(span[@class='section']) != 'VTT'">
+		<xsl:apply-templates select="span" />
+		<xsl:text>
+		</xsl:text>
+	</xsl:if>
 </xsl:template>
 
 
 <xsl:template match="span">
   <xsl:if test="@class='section'">
-    Section : <xsl:value-of select="normalize-space(.)" />
-  </xsl:if>
+   	Section : <xsl:value-of select="normalize-space(.)" />
+	</xsl:if>
   <xsl:if test="@class='nom'">
     Nom : <xsl:value-of select="normalize-space(a)" />
     Référence : <xsl:value-of select="concat('http://v3.velo101.fr',a/@href)" />

@@ -1,9 +1,10 @@
-myscripts (0.4.2-1) UNRELEASED; urgency=low
+myscripts (0.4.2-2) UNRELEASED; urgency=low
 
   * Update my-photo-sign script to add border to image,
-  * Update go-chroot to mount /dev/pts with bind options.
+  * Update go-chroot to mount /dev/pts with bind options,
+  * Update my-cyclo-epreuves script to keep only Cyclo.
 
- -- Laurent Guignard <lguignard.debian@gmail.com>  Fri, 01 May 2015 12:03:06 +0200
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Sun, 22 Nov 2015 12:00:11 +0100
 
 myscripts (0.4.1-1) unstable; urgency=low
 
