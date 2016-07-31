@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+#    <Script to build a muttrc compatible list of mailboxes from directory >
+#    Copyright (C) 2015  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+MAILBOX_DIR="$1"
+DIR="$HOME/$MAILBOX_DIR"
+
+if test -d "$DIR"; then
+	for elem in `find "$DIR" -type d -not -path "*/cur*" -not -path "*/tmp*" -not -path "*/new*" -print`;
+		do
+			if test -d $elem; then
+				echo "mailboxes $elem"
+			fi
+		done
+		exit 0
+else
+	echo "Directory $MAILBOX_DIR doesn't exist !"
+	exit -1
+fi

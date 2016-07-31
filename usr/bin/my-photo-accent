@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #    <Script to add signature to image>
-#    Copyright (C) 2014  Laurent Guignard<lguignard.debian@gmail.com>
+#    Copyright (C) 2016  Laurent Guignard<lguignard.debian@gmail.com>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -19,29 +19,36 @@
 #
 
 #!/bin/sh
-IMAGE="$1"
+IMAGE=$1
 CAPTION="Photos by Laurent Guignard - http://velo.famille-guignard.org"
 #FONT="/usr/share/myscripts/FLAMER.TTF"
 FONT="/usr/share/fonts/truetype/freefont/FreeSans.ttf"
 BORDERWIDTH="6"
 BORDERWIDTH2="1"
 
-width=`identify -format "%w" "$IMAGE"`
-heigth=`identify -format "%h" "$IMAGE"`
+width=`identify -format "%w" $IMAGE`
+heigth=`identify -format "%h" $IMAGE`
 
-convert -size 40x${width} gradient:none-white -rotate -90 +repage gradient.png
+#convert -size 40x${width} gradient:none-white -rotate -90 +repage gradient.png
 
-convert -size ${width}x40 -background none -fill white -font $FONT -gravity East label:"`echo $CAPTION`" text_mask.png
+#convert -size ${width}x40 -background none -fill white -font $FONT -gravity East label:"`echo $CAPTION`" text_mask.png
 
-convert gradient.png text_mask.png -alpha set -compose Dst_Out -composite gradient.png
+#convert gradient.png text_mask.png -alpha set -compose Dst_Out -composite gradient.png
 
-composite -gravity South gradient.png "$IMAGE" "tmp-$IMAGE"
-rm gradient.png text_mask.png
+#composite -gravity South gradient.png "$IMAGE" "tmp-$IMAGE"
+#rm gradient.png text_mask.png
 
-convert "tmp-$IMAGE" -bordercolor black -border 10 "copy-$IMAGE"
-rm -f "tmp-$IMAGE"
+#convert "tmp-$IMAGE" -bordercolor black -border 10 "copy-$IMAGE"
 
-mogrify -bordercolor white -border "${BORDERWIDTH}x${BORDERWIDTH}" "copy-$IMAGE"
-mogrify -bordercolor black -border "${BORDERWIDTH2}x${BORDERWIDTH2}" "copy-$IMAGE"
+#mogrify -bordercolor white -border "${BORDERWIDTH}x${BORDERWIDTH}" "copy-$IMAGE"
+#mogrify -bordercolor black -border "${BORDERWIDTH2}x${BORDERWIDTH2}" "copy-$IMAGE"
+
+
+
+for i in *.JPG; do my-photo-sign "$i"; done
+
+
+
+
 
 
