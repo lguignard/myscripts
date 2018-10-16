@@ -203,8 +203,8 @@ accept_input() {
 
 	$IPTABLES -A INPUT -p tcp -s $LOCAL_NETWORK --sport 1024: --dport 443 -j ACCEPT
 	$IPTABLES -A INPUT -p tcp -s $LOOPBACK --sport 1024: --dport 443 -j ACCEPT
-	$IPTABLES -A INPUT -p tcp --dport 443 -j LOG_DROP
-	$IPTABLES -A INPUT -p tcp --sport 443 -j LOG_DROP
+	$IPTABLES -A INPUT -p tcp --dport 443 -j ACCEPT
+	$IPTABLES -A INPUT -p tcp --sport 443 -j ACCEPT
 
 
 	# LDAP
@@ -217,11 +217,8 @@ accept_input() {
 	# RNDC (named)
 	$IPTABLES -A INPUT -p tcp --dport 953 -j ACCEPT
 
-
-
 	# RSYNC
 	#$IPTABLES -A INPUT -i $1 -s 127.0.0.1 -p tcp --sport 873 -m state --state ESTABLISHED,RELATED -j ACCEPT
-
 
 	# IMAPS
 	#$IPTABLES -A INPUT -i $1 -s 127.0.0.1 -p tcp --sport 993 -m state --state ESTABLISHED,RELATED -j ACCEPT
@@ -243,6 +240,17 @@ accept_input() {
 
 #------- Default ------------
 #	$IPTABLES -A INPUT -j LOG_INFO
+
+	# Accès upnp sur le réseau local
+	
+	$IPTABLES -A INPUT -s 192.168.0.0/24 -m tcp -p tcp --dport 49152 -j ACCEPT
+	$IPTABLES -A INPUT -s 192.168.0.0/24 -m udp -p udp --dport 49152 -j ACCEPT
+	$IPTABLES -A INPUT -s 192.168.0.0/24 -m udp -p udp --dport 1900 -j ACCEPT
+
+	# On accepte tout ce qui vient/va de la Freebox
+	$IPTABLES -A INPUT -s 212.27.40.254 -j ACCEPT
+	$IPTABLES -A INPUT -s 212.27.38.253 -j ACCEPT
+
 	echo " Done."
 }
 
@@ -263,7 +271,6 @@ accept_forward() {
 accept_output() {
 	echo -ne "\tSet OUTPUT policy : "
 	
-
 #---------- ICMP -------------
 	$IPTABLES -A OUTPUT -p icmp --icmp-type echo-request -j ACCEPT
 	$IPTABLES -A OUTPUT -d $ROUTER -p icmp --icmp-type echo-reply -j ACCEPT
@@ -271,7 +278,6 @@ accept_output() {
 	$IPTABLES -A OUTPUT -d $LOCAL_NETWORK -p icmp --icmp-type echo-reply -j ACCEPT
 	$IPTABLES -A OUTPUT -d $LOCAL_NETWORK -p icmp --icmp-type port-unreachable -j ACCEPT
 	$IPTABLES -A OUTPUT -p icmp --icmp-type echo-reply -j LOG_DROP
-
 
 	$IPTABLES -A OUTPUT -p udp -d $LOCAL_NETWORK --j ACCEPT
 	$IPTABLES -A OUTPUT -p tcp -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT

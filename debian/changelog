@@ -1,12 +1,14 @@
-myscripts (0.4.2-2.1) UNRELEASED; urgency=low
+myscripts (0.4.2-4) UNRELEASED; urgency=low
 
   * Update my-photo-sign script to add border to image, solve a script bug
   * Update go-chroot to mount /dev/pts with bind options,
   * Update my-cyclo-epreuves script to keep only Cyclo,
   * Add my-photo-accent script whithout manpage,
-  * Add my-muttbal script whithout manpage.
+  * Add my-muttbal script whithout manpage,
+  * Update my-firewall script,
+  * Add script my-vidcut.
 
- -- Laurent Guignard <lguignard2000@gmail.com>  Sun, 31 Jul 2016 16:26:48 +0200
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Sun, 06 May 2018 20:33:33 +0200
 
 myscripts (0.4.1-1) unstable; urgency=low
 

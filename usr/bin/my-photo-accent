@@ -31,6 +31,9 @@ heigth=`identify -format "%h" $IMAGE`
 
 #convert -size 40x${width} gradient:none-white -rotate -90 +repage gradient.png
 
+convert -size ${width}x${height} xc:black blackimage.png
+
+
 #convert -size ${width}x40 -background none -fill white -font $FONT -gravity East label:"`echo $CAPTION`" text_mask.png
 
 #convert gradient.png text_mask.png -alpha set -compose Dst_Out -composite gradient.png
