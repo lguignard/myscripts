@@ -2,17 +2,21 @@
 .SH NAME
 my-photo \- script to convert NEF photos to JPG
 .SH SYNOPSIS
-.B my-nef2jpg
+.B my-nef2jpg 
+	files
 directory
 .SH DESCRIPTION
-This script is used to convert NEF photo (NIKON) to JPG file.
+This script is used to convert NEF file (NIKON photo) to JPG file.
 .PP
-.B directory
-source directory in which all photos to convert are saved.
+.B files
+source files to convert. This argument could be build with system shell 
+jokers like '*' or '?' characters.
+All JPEG files are stored in './jpeg' directory. this directory is created
+if it doesn't exist.
 .SH SEE ALSO
 .BR ufraw-batch (1)
 .SH AUTHOR
-my-nef2jpg was written by Laurent Guignard <lguignard.debian@gmail.com>.
+my-nef2jpg was written by Laurent Guignard <lguignard2000@gmail.com>.
 .PP
-This manual page was written by Laurent Guignard <lguignard.debian@gmail.com>,
+This manual page was written by Laurent Guignard <lguignard2000@gmail.com>,
 for the Debian project (but may be used by others).

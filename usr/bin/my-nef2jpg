@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #    <Script to convert NEF photos to JPG>
-#    Copyright (C) 2018  Laurent Guignard<lguignard.debian@gmail.com>
+#    Copyright (C) 2018  Laurent Guignard<lguignard2000@gmail.com>
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -42,8 +42,6 @@ areToolsHere() {
 		exit 1
 	fi
 }
-
-
 
 
 #
