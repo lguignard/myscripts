@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+#    <Script to convert NEF photos to JPG>
+#    Copyright (C) 2018  Laurent Guignard<lguignard.debian@gmail.com>
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; version 2 of the License
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, 
+#    MA 02110-1301 USA
+#
+
+#
+# \fn usage()
+# \brief Show a summary of command usage
+Usage () {
+	echo "$0 usage :"
+	echo "\t$0 source"
+  echo 
+	echo "\tsource : "
+  echo
+  echo "\tDescription :"
+  echo "\tThis tools will convert all NEF files given as argument to JPEG files."
+  echo "\tAll JPEG files will be stored in ./jpeg directory."
+}
+
+
+#
+# \brief Needed tools are installed or not
+areToolsHere() {
+	if test ! -x /usr/bin/ufraw-batch; then
+		echo -n "/usr/bin/ufraw-batch is needed. Under Debian this software is provided"
+		echo " by 'ufraw-batch' package."
+		exit 1
+	fi
+}
+
+
+
+
+#
+# Main
+if [ "$#" -ne "1" ]; then
+	Usage
+	exit 1
+fi
+
+#areToolsHere
+
+if [ ! -d ./jpeg ]; then
+  mkdir ./jpeg
+fi
+
+ufraw-batch --out-type=jpeg --out-path=./jpeg "$1"
+
+exit 0
