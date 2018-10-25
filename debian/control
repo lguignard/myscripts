@@ -3,7 +3,7 @@ Section: shells
 Priority: extra
 Maintainer: Laurent Guignard <lguignard.debian@gmail.com>
 Build-Depends: debhelper (>= 10), lintian
-Standards-Version: 3.9.6
+Standards-Version: 4.2.1
 
 Package: myscripts
 Architecture: all

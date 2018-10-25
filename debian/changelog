@@ -1,4 +1,4 @@
-myscripts (0.4.2-4) UNRELEASED; urgency=low
+myscripts (0.4.3) UNRELEASED; urgency=low
 
   * Update my-photo-sign script to add border to image, solve a script bug
   * Update go-chroot to mount /dev/pts with bind options,
@@ -7,8 +7,9 @@ myscripts (0.4.2-4) UNRELEASED; urgency=low
   * Add my-muttbal script whithout manpage,
   * Update my-firewall script,
   * Add script my-vidcut.
+  * Update of my-nef2jpg script
 
- -- Laurent Guignard <lguignard.debian@gmail.com>  Sun, 06 May 2018 20:33:33 +0200
+ -- Laurent Guignard <lguignard.debian@gmail.com>  Thu, 25 Oct 2018 15:45:01 +0200
 
 myscripts (0.4.1-1) unstable; urgency=low
 
