@@ -56,6 +56,7 @@ LOCAL_NETWORK="192.168.1.0"
 LOCAL_NETWORK="192.168.1.0/24"
 LOOPBACK="127.0.0.1"
 ROUTER="192.168.1.1"
+CHROMECAST_IP="10.1.2.3"
 
 #
 # Fonction permettant de lister les interfaces de la machine
@@ -109,6 +110,11 @@ set_default_rules() {
 
 	$IPTABLES -A OUTPUT -d $LOOPBACK -j ACCEPT
 
+	echo -ne "\tAllow Chromecast streaming :"
+	$IPTABLES -A INPUT -s ${CHROMECAST_IP}/32 -p udp -m multiport --sports 32768:61000 -m multiport --dports 32768:61000 -m comment --comment "Allow Chromecast UDP data (inbound)" -j ACCEPT
+	$IPTABLES -A OUTPUT -d ${CHROMECAST_IP}/32 -p udp -m multiport --sports 32768:61000 -m multiport --dports 32768:61000 -m comment --comment "Allow Chromecast UDP data (outbound)" -j ACCEPT
+	$IPTABLES -A OUTPUT -d ${CHROMECAST_IP}/32 -p tcp -m multiport --dports 8008:8009 -m comment --comment "Allow Chromecast TCP data (outbound)" -j ACCEPT
+	$IPTABLES -A OUTPUT -d 239.255.255.250/32 -p udp --dport 1900 -m comment --comment "Allow Chromecast SSDP" -j ACCEPT
 
 	echo -ne "\tSet Multicast DNS policy : "
 # $IPTABLES -A INPUT -p udp --dport 5353 -j ACCEPT

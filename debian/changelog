@@ -1,6 +1,6 @@
-myscripts (0.4.3) UNRELEASED; urgency=low
+myscripts (0.4.3-1) unstable; urgency=low
 
-  * Update my-photo-sign script to add border to image, solve a script bug
+  * Update my-photo-sign script to add border to image, solve a script bug,
   * Update go-chroot to mount /dev/pts with bind options,
   * Update my-cyclo-epreuves script to keep only Cyclo,
   * Add my-photo-accent script whithout manpage,

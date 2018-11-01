@@ -18,6 +18,10 @@
 #    MA 02110-1301 USA
 #
 
+NBARG="$#"
+ARG="$1"
+
+
 #
 # \fn usage()
 # \brief Show a summary of command usage
@@ -26,6 +30,7 @@ Usage () {
 	echo "\t$0 source"
   echo 
 	echo "\tsource : "
+  echo "\tThis is the directory where all NEF files are saved."
   echo
   echo "\tDescription :"
   echo "\tThis tools will convert all NEF files given as argument to JPEG files."
@@ -36,27 +41,33 @@ Usage () {
 #
 # \brief Needed tools are installed or not
 areToolsHere() {
+	
+
 	if test ! -x /usr/bin/ufraw-batch; then
 		echo -n "/usr/bin/ufraw-batch is needed. Under Debian this software is provided"
 		echo " by 'ufraw-batch' package."
 		exit 1
+	fi
+
+	if [ "$NBARG" -ne "1" ]; then
+		Usage
+		exit 2
 	fi
 }
 
 
 #
 # Main
-if [ "$#" -ne "1" ]; then
-	Usage
-	exit 1
-fi
 
-#areToolsHere
+areToolsHere
 
 if [ ! -d ./jpeg ]; then
   mkdir ./jpeg
 fi
 
-ufraw-batch --out-type=jpeg --out-path=./jpeg "$1"
+
+for i in "$ARG"/*.NEF; do
+	ufraw-batch --out-type=jpeg --out-path="$ARG/jpeg" "$i"
+done
 
 exit 0

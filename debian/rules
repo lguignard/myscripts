@@ -11,6 +11,7 @@
 
 
 
+# s/dh_clean -k/dh_prep
 
 CFLAGS = -Wall -g
 
@@ -41,12 +42,13 @@ clean:
 	dh_testroot
 	rm -f build-stamp configure-stamp
 	$(MAKE) clean
-	dh_clean 
+	dh_clean
+	dh_prep
 
 install: build
 	dh_testdir
 	dh_testroot
-	dh_clean -k 
+	dh_prep
 	dh_installdirs
 	$(MAKE) DESTDIR=$(CURDIR)/debian/myscripts install
 

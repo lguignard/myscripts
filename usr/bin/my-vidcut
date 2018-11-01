@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 #    <Script to cut video with ffmpeg>
-#    Copyright (C) 2018 - Laurent Guignard
+#    Copyright (C) 2018 - Laurent Guignard<lguignard2000@gmail.com>
 #
 #   This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -26,22 +26,40 @@ STARTSTR=`echo $START | tr : -`
 ENDSTR=`echo $END | tr : -`
 
 
-if [ ! -f $FFMPEG ]; then
-	echo "ffmpeg not installed !"
-	exit 1
-else
-	echo "ffmpeg installed."
 
+Usage() {
+	echo "Usage of $0"
+	echo ""
+	echo "Synopsis : "
+	echo -e "\t$0 start_position end_position source_file"
+	echo
+	echo -e "\t"
+}
+
+
+
+#
+# Check dependences
+CheckDependences() {
+
+	if [ ! -f $FFMPEG ]; then
+		echo "ffmpeg not installed !"
+		exit 1
+	fi
+}
+
+
+#
+# Main
 	if [ -f "$FILE" ] || [ ! -z "$START" ] || [ ! -z "$END" ]; then
 		echo "Cutting $FILE..."
 		EXTENSION="${FILE##*.}"
 		NEWFILE="$FILE"_"$STARTSTR"_"$ENDSTR"."$EXTENSION"
 		echo "$FILE is cut in $NEWFILE."
 
-		$FFMPEG -ss "$START" -t "$END" -i "$FILE" "$NEWFILE"
+		$FFMPEG -ss "$START" -i "$FILE" -to "$END" -acodec copy -vcodec copy "$NEWFILE"
 	else
 		echo "Bad parameters !"
 		exit 2
 	fi
-fi
 
