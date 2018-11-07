@@ -74,9 +74,10 @@ fi
 cd "$DESTPKG"
 
 DPKG_BLDPKG_OPTS="-tc $MORE_DPKG_OPT"
-dpkg-buildpackage -rfakeroot $DPKG_BLDPKG_OPTS
 if [ "$FASTER" = "false" ]; then
-	dpkg-buildpackage -rfakeroot -sa $DPKG_BLDPKG_OPTS
+	dpkg-buildpackage -rfakeroot -sa -b $DPKG_BLDPKG_OPTS
+else
+  dpkg-buildpackage -rfakeroot -sa $DPKG_BLDPKG_OPTS
 fi
 
 changefile=`ls $BASE/$PKGNAME/*.changes`

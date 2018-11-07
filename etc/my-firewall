@@ -56,7 +56,6 @@ LOCAL_NETWORK="192.168.1.0"
 LOCAL_NETWORK="192.168.1.0/24"
 LOOPBACK="127.0.0.1"
 ROUTER="192.168.1.1"
-CHROMECAST_IP="10.1.2.3"
 
 #
 # Fonction permettant de lister les interfaces de la machine
@@ -86,6 +85,13 @@ set_default_rules() {
 	echo "Set firewalling policies."
 	$IPTABLES -F 
 	
+	echo -ne "\tSet LOG_DROP policy : "
+#	$IPTABLES -X LOG_DROP
+	$IPTABLES -N LOG_DROP
+	$IPTABLES -A LOG_DROP -m limit --limit 5/minute -j LOG --log-level 4 --log-prefix "iptables: LOGDROP " --log-tcp-sequence --log-tcp-options --log-ip-options
+	$IPTABLES -A LOG_DROP -j DROP
+	echo " Done."
+
 	echo -en "\tDrop all policy : "
 	$IPTABLES -P INPUT DROP
 	$IPTABLES -P FORWARD DROP
@@ -110,21 +116,10 @@ set_default_rules() {
 
 	$IPTABLES -A OUTPUT -d $LOOPBACK -j ACCEPT
 
-	echo -ne "\tAllow Chromecast streaming :"
-	$IPTABLES -A INPUT -s ${CHROMECAST_IP}/32 -p udp -m multiport --sports 32768:61000 -m multiport --dports 32768:61000 -m comment --comment "Allow Chromecast UDP data (inbound)" -j ACCEPT
-	$IPTABLES -A OUTPUT -d ${CHROMECAST_IP}/32 -p udp -m multiport --sports 32768:61000 -m multiport --dports 32768:61000 -m comment --comment "Allow Chromecast UDP data (outbound)" -j ACCEPT
-	$IPTABLES -A OUTPUT -d ${CHROMECAST_IP}/32 -p tcp -m multiport --dports 8008:8009 -m comment --comment "Allow Chromecast TCP data (outbound)" -j ACCEPT
-	$IPTABLES -A OUTPUT -d 239.255.255.250/32 -p udp --dport 1900 -m comment --comment "Allow Chromecast SSDP" -j ACCEPT
 
 	echo -ne "\tSet Multicast DNS policy : "
 # $IPTABLES -A INPUT -p udp --dport 5353 -j ACCEPT
 #	$IPTABLES -A INPUT -p udp --sport 5353 -j ACCEPT
-	echo " Done."
-
-	echo -ne "\tSet LOG_DROP policy : "
-	$IPTABLES -N LOG_DROP
-	$IPTABLES -A LOG_DROP -m limit --limit 5/minute -j LOG  --log-level 4 --log-prefix "iptables: LOGDROP " --log-tcp-sequence  --log-tcp-options --log-ip-options
-	$IPTABLES -A LOG_DROP -j DROP
 	echo " Done."
 
 	echo -ne "\tSet LOG_ACCEPT policy : "
@@ -182,6 +177,12 @@ accept_input() {
 	$IPTABLES -A INPUT -p udp --sport 68 -j ACCEPT		# BOOTP
 	$IPTABLES -A INPUT -p udp -s $LOCAL_NETWORK --sport 123 -j ACCEPT		# NTP
 
+	# Chromecast UDP protocol
+	$IPTABLES -A INPUT -p udp -s $LOCAL_NETWORK --sport 1900 -j ACCEPT		# SSDP
+	$IPTABLES -A INPUT -p udp -s $LOCAL_NETWORK --sport 5353 -j ACCEPT		# mDNS
+
+
+
 	# Tous flux UDP
 	$IPTABLES -A INPUT -p udp -s $LOCAL_NETWORK --sport 1024: --dport 1024: -j ACCEPT						
 
@@ -223,6 +224,10 @@ accept_input() {
 	# RNDC (named)
 	$IPTABLES -A INPUT -p tcp --dport 953 -j ACCEPT
 
+	# Chromecast TCP protocol
+	$IPTABLES -A INPUT -p tcp --dport 8008 -j ACCEPT
+	$IPTABLES -A INPUT -p tcp --dport 8009 -j ACCEPT
+
 	# RSYNC
 	#$IPTABLES -A INPUT -i $1 -s 127.0.0.1 -p tcp --sport 873 -m state --state ESTABLISHED,RELATED -j ACCEPT
 
@@ -246,17 +251,6 @@ accept_input() {
 
 #------- Default ------------
 #	$IPTABLES -A INPUT -j LOG_INFO
-
-	# Accès upnp sur le réseau local
-	
-	$IPTABLES -A INPUT -s 192.168.0.0/24 -m tcp -p tcp --dport 49152 -j ACCEPT
-	$IPTABLES -A INPUT -s 192.168.0.0/24 -m udp -p udp --dport 49152 -j ACCEPT
-	$IPTABLES -A INPUT -s 192.168.0.0/24 -m udp -p udp --dport 1900 -j ACCEPT
-
-	# On accepte tout ce qui vient/va de la Freebox
-	$IPTABLES -A INPUT -s 212.27.40.254 -j ACCEPT
-	$IPTABLES -A INPUT -s 212.27.38.253 -j ACCEPT
-
 	echo " Done."
 }
 
